@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | SmartEarn</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-[#020617] h-screen flex items-center justify-center p-6 text-slate-300">
+
+    <!-- Animated Balloon Background -->
+    <canvas id="balloon-canvas" class="fixed inset-0 z-[-1] pointer-events-none"></canvas>
+
+    <div class="w-full max-w-md">
+        <div class="text-center mb-8">
+            <a href="index.html" class="text-3xl font-black tracking-tighter text-blue-600 mb-2 inline-block">SMARTEARN.</a>
+            <p class="text-slate-400 font-medium">Welcome back! Please login to your portal.</p>
+        </div>
+
+        <div class="bg-white/5 p-8 rounded-3xl border border-white/10 shadow-2xl backdrop-blur-xl">
+            <!-- Standard Login -->
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label for="identifier" class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Email or Phone Number</label>
+                    <input id="identifier" type="text" required placeholder="name@company.com or +254..." class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition text-white placeholder-slate-600">
+                </div>
+                <div>
+                    <label for="password" class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Password</label>
+                    <input id="password" type="password" required placeholder="••••••••" class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition text-white placeholder-slate-600">
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition">Sign In</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:5000';
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const attemptsKey = 'login_attempts';
+            const lockoutKey = 'login_lockout';
+            const now = Date.now();
+            const lockoutUntil = parseInt(localStorage.getItem(lockoutKey) || '0');
+
+            if (lockoutUntil && now < lockoutUntil) {
+                const minutesLeft = Math.ceil((lockoutUntil - now) / 1000 / 60);
+                alert(`Too many failed attempts. Please try again in ${minutesLeft} minutes.`);
+                return;
+            }
+
+            // Use 'identifier' for the email/phone field as the backend model handles both
+            const email = document.getElementById('identifier').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Store authentication data in localStorage
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('userId', data.userId);
+                    localStorage.setItem('fullName', data.fullName);
+                    localStorage.removeItem(attemptsKey);
+                    localStorage.removeItem(lockoutKey);
+
+                    // Redirect to the user dashboard
+                    window.location.href = 'dashboard.html';
+                } else if (response.status === 403 && data.needsActivation) {
+                    // Handle account not activated
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('userId', data.userId);
+                    localStorage.setItem('registeredName', data.fullName);
+                    localStorage.setItem('registeredPhone', data.phoneNumber);
+                    localStorage.removeItem(attemptsKey);
+                    localStorage.removeItem(lockoutKey);
+                    
+                    window.location.href = 'payments.html';
+                } else {
+                    let attempts = parseInt(localStorage.getItem(attemptsKey) || '0') + 1;
+                    localStorage.setItem(attemptsKey, attempts);
+                    
+                    if (attempts >= 5) {
+                        localStorage.setItem(lockoutKey, now + (15 * 60 * 1000));
+                        alert('Too many failed attempts. You are locked out for 15 minutes.');
+                    } else {
+                        alert(data.message || 'Login failed. Please check your details.');
+                    }
+                }
+            } catch (error) {
+                console.error('Error during login:', error);
+                alert('An error occurred. Please check your connection and try again.');
+            }
+        });
+
+        // Balloon Background Logic
+        const canvas = document.getElementById('balloon-canvas');
+        const ctx = canvas.getContext('2d');
+        let balloons = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Balloon {
+            constructor() {
+                this.radius = 25; // 50px diameter
+                this.x = Math.random() * (canvas.width - this.radius * 2) + this.radius;
+                this.y = Math.random() * (canvas.height - this.radius * 2) + this.radius;
+                this.dx = (Math.random() - 0.5) * 2; // Random velocity X
+                this.dy = (Math.random() - 0.5) * 2; // Random velocity Y
+                this.color = `hsla(${Math.random() * 360}, 70%, 60%, 0.3)`;
+            }
+
+            draw() {
+                ctx.beginPath();
+                // Draw the balloon body
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                
+                // Draw the highlight/shine for a 3D effect
+                ctx.beginPath();
+                ctx.arc(this.x - this.radius/3, this.y - this.radius/3, this.radius/4, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+                ctx.fill();
+
+                // Draw the small triangle at the bottom
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y + this.radius);
+                ctx.lineTo(this.x - 5, this.y + this.radius + 10);
+                ctx.lineTo(this.x + 5, this.y + this.radius + 10);
+                ctx.closePath();
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+
+            update() {
+                // Collision detection with edges
+                if (this.x + this.radius > canvas.width || this.x - this.radius < 0) {
+                    this.dx = -this.dx;
+                }
+                if (this.y + this.radius > canvas.height || this.y - this.radius < 0) {
+                    this.dy = -this.dy;
+                }
+
+                this.x += this.dx;
+                this.y += this.dy;
+
+                this.draw();
+            }
+        }
+
+        function initBalloons() {
+            balloons = [];
+            for (let i = 0; i < 50; i++) {
+                balloons.push(new Balloon());
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            balloons.forEach(balloon => balloon.update());
+            requestAnimationFrame(animate);
+        }
+
+        initBalloons();
+        animate();
+    </script>
+
+</body>
+</html>

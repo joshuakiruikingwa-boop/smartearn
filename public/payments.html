@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Activation | SmartEarn</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-[#020617] h-screen flex items-center justify-center p-6 text-slate-300">
+
+    <!-- Animated Balloon Background -->
+    <canvas id="balloon-canvas" class="fixed inset-0 z-[-1] pointer-events-none"></canvas>
+
+    <div class="w-full max-w-md">
+        <div class="text-center mb-8"> 
+            <a href="index.html" class="text-3xl font-black tracking-tighter text-blue-600 mb-2 inline-block uppercase">SMARTEARN.</a>
+            <h2 id="welcome-message" class="text-2xl font-bold text-white">Welcome!</h2>
+            <p class="text-slate-400 font-medium">Activate your account to start earning today.</p>
+        </div>
+
+        <div class="bg-white/5 p-8 rounded-3xl border border-white/10 shadow-2xl backdrop-blur-xl">
+            <div class="text-center space-y-6">
+                <div class="w-20 h-20 bg-blue-600/20 text-blue-500 rounded-full flex items-center justify-center mx-auto text-3xl">
+                    <i class="fas fa-shield-check"></i>
+                </div>
+                
+                <div>
+                    <h3 class="text-white font-bold text-lg">One last step!</h3>
+                    <p class="text-slate-400 text-sm mt-2 leading-relaxed">
+                        To unlock all features including premium tasks and surveys, please activate your account.
+                    </p>
+                </div>
+
+                <div class="bg-blue-600/10 p-5 rounded-2xl border border-blue-500/20">
+                    <p class="text-xs font-bold text-blue-400 uppercase tracking-widest mb-1">Activation Fee</p>
+                    <p id="display-fee" class="text-3xl font-black text-white">Ksh ...</p>
+                </div>
+
+                <button id="stk-push-btn" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition transform active:scale-95 flex items-center justify-center">
+                    <i class="fas fa-bolt mr-2"></i> Activate Account
+                </button>
+                
+                <p class="text-[10px] text-slate-500 font-medium italic">
+                    A notification will be sent to your phone to complete the payment via M-Pesa.
+                </p>
+            </div>
+        </div>
+
+        <!-- WhatsApp Help Line -->
+        <div class="text-center mt-8 pt-6 border-t border-white/10">
+            <p class="text-slate-500 text-xs mb-3 font-semibold uppercase tracking-widest">Encountering Issues?</p>
+            <a href="https://wa.me/254768734824" target="_blank" class="inline-flex items-center space-x-2 text-emerald-500 hover:text-emerald-400 font-bold transition group">
+                <i class="fab fa-whatsapp text-xl group-hover:scale-110 transition-transform"></i>
+                <span class="underline underline-offset-4">WhatsApp Help Line</span>
+            </a>
+        </div>
+        
+    </div>
+
+    <script>
+        // Session Validation
+        const token = localStorage.getItem('token');
+        if (!token || token === 'undefined' || token === 'null') {
+            window.location.href = 'login.html';
+        }
+
+        const API_BASE_URL = 'http://localhost:5000';
+
+        // Welcoming message with registered name
+        const registeredName = localStorage.getItem('registeredName') || 'Valued Member';
+        // Ensure phone is clean (digits only) just in case
+        const registeredPhone = (localStorage.getItem('registeredPhone') || '').replace(/\D/g, '');
+        document.getElementById('welcome-message').textContent = `Welcome, ${registeredName}!`;
+
+        let currentActivationFee = 1; 
+
+        // Fetch dynamic fee from settings
+        async function fetchActivationFee() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/auth/settings`);
+                const data = await response.json();
+                if (data.success) {
+                    currentActivationFee = parseFloat(data.activationFee);
+                    document.getElementById('display-fee').textContent = `Ksh ${currentActivationFee.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+                }
+            } catch (error) {
+                console.error('Error fetching fee:', error);
+                document.getElementById('display-fee').textContent = 'Ksh 500.00';
+                currentActivationFee = 500;
+            }
+        }
+        fetchActivationFee();
+
+        // Check status on page load (in case of redirect back)
+        async function checkStatus() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/auth/check-status`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                if (data.success && data.is_active) {
+                    window.location.href = 'login.html';
+                }
+                return data.is_active;
+            } catch (error) {
+                console.error('Error checking status:', error);
+                return false;
+            }
+        }
+        checkStatus();
+
+        // Poll for activation status
+        let pollingInterval;
+        function startPolling() {
+            if (pollingInterval) return;
+            pollingInterval = setInterval(async () => {
+                const isActive = await checkStatus();
+                if (isActive) {
+                    clearInterval(pollingInterval);
+                }
+            }, 3000); // Check every 3 seconds
+        }
+
+        document.getElementById('stk-push-btn').addEventListener('click', async () => {
+            const btn = document.getElementById('stk-push-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Initializing STK Push...';
+
+            try {
+                console.log("Initiating payment for:", registeredPhone);
+                
+                if (!registeredPhone) {
+                    alert("Phone number not found. Please register again.");
+                    window.location.href = 'registration.html';
+                    return;
+                }
+
+                const response = await fetch(`${API_BASE_URL}/api/payments/pesapal/submit-order`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ 
+                        amount: currentActivationFee, 
+                        phone: registeredPhone,
+                        type: 'activation',
+                        userId: localStorage.getItem('userId') // Pass userId to backend
+                    })
+                });
+
+                let data;
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    data = await response.json();
+                } else {
+                    const text = await response.text();
+                    throw new Error(`Server returned non-JSON response: ${text.substring(0, 100)}`);
+                }
+
+                // Handle expired or rejected tokens
+                if (response.status === 401 || data.message === 'Invalid Token') {
+                    localStorage.removeItem('token');
+                    alert('Your session has expired or is invalid. Please sign in again.');
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                if (response.ok && data.success) {
+                    if (data.redirect_url) {
+                        // Redirect immediately to the payment portal
+                        window.location.href = data.redirect_url;
+                    } else {
+                        alert(data.message || 'Payment initiated. Please check your phone for the STK push. You will be redirected to the login page once confirmed.');
+                        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Waiting for payment...';
+                        startPolling();
+                    }
+                } else {
+                    alert(data.message || 'Could not initiate STK push. Please try again.');
+                }
+            } catch (error) {
+                console.error('Payment error:', error);
+                alert('An error occurred while initiating payment. Please check your connection.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-bolt mr-2"></i> Activate Account';
+            }
+        });
+
+        // Shared Balloon Background Logic
+        const canvas = document.getElementById('balloon-canvas');
+        const ctx = canvas.getContext('2d');
+        let balloons = [];
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize); resize();
+        class Balloon {
+            constructor() {
+                this.radius = 25; this.x = Math.random() * (canvas.width - 50) + 25; this.y = Math.random() * (canvas.height - 50) + 25;
+                this.dx = (Math.random() - 0.5) * 1.5; this.dy = (Math.random() - 0.5) * 1.5; this.color = `hsla(${Math.random() * 360}, 60%, 50%, 0.2)`;
+            }
+            draw() {
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fillStyle = this.color; ctx.fill();
+                ctx.beginPath(); ctx.arc(this.x - 8, this.y - 8, 6, 0, Math.PI * 2); ctx.fillStyle = 'rgba(255,255,255,0.05)'; ctx.fill();
+            }
+            update(others) {
+                if (this.x + this.radius > canvas.width || this.x - this.radius < 0) this.dx *= -1;
+                if (this.y + this.radius > canvas.height || this.y - this.radius < 0) this.dy *= -1;
+                others.forEach(o => { if (o !== this) { const d = Math.hypot(o.x - this.x, o.y - this.y); if (d < this.radius + o.radius) { [this.dx, o.dx] = [o.dx, this.dx]; [this.dy, o.dy] = [o.dy, this.dy]; } } });
+                this.x += this.dx; this.y += this.dy; this.draw();
+            }
+        }
+        for (let i = 0; i < 40; i++) balloons.push(new Balloon());
+        function animate() { ctx.clearRect(0, 0, canvas.width, canvas.height); balloons.forEach(b => b.update(balloons)); requestAnimationFrame(animate); }
+        animate();
+    </script>
+</body>
+</html>

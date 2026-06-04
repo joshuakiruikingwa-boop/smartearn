@@ -1,0 +1,27 @@
+Website Page Plan
+1. Public Facing (Guest)
+Landing Page: High-conversion hero section, "How it Works" (Invite/Watch/Earn), and Call to Action (CTA).
+
+Authentication: Social Login integration (Google/Facebook) and traditional Email/Password.
+
+About & FAQ: Clear explanation of the 3-level invite system and payment thresholds.
+
+2. User Portal (The Dashboard)
+Earnings Overview: Real-time balance (Ad revenue, Spin rewards, Referral commissions).
+
+Earning Center: Dedicated zones for "Watch Ads" and the "Daily Spin" wheel.
+
+Referral Management: 3-tier tree view showing Level 1, 2, and 3 recruits and total commission from each.
+
+Wallet/Withdrawal: Interface to link payment methods and request payouts.
+
+Profile/Settings: Management of user roles and personal data.
+
+3. Admin Portal (Control Center)
+User Management: Search, ban, or verify users; manually adjust roles.
+
+Ad & Spin Manager: Set the "Price per View" for ads and the probability/reward amounts for the spin wheel.
+
+Finance/Payout Queue: Approve or reject withdrawal requests.
+
+System Analytics: Track total platform revenue vs. user payouts.

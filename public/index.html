@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EarnPoint | Freelance & Rewards Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gradient-text {
+            background: linear-gradient(90deg, #3b82f6, #a855f7, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .phone-perspective {
+            perspective: 1200px;
+        }
+        .phone-rotate {
+            transform: rotateY(-20deg) rotateX(10deg) rotateZ(5deg);
+            transition: all 0.5s ease;
+        }
+        .phone-rotate:hover {
+            transform: rotateY(0deg) rotateX(0deg) rotateZ(0deg) scale(1.05);
+            z-index: 50;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px) rotateY(-20deg) rotateX(10deg); }
+            50% { transform: translateY(-20px) rotateY(-15deg) rotateX(5deg); }
+            100% { transform: translateY(0px) rotateY(-20deg) rotateX(10deg); }
+        }
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        .animate-float-delayed {
+            animation: float 6s ease-in-out infinite;
+            animation-delay: 2s;
+        }
+        .animate-float-fast {
+            animation: float 6s ease-in-out infinite;
+            animation-delay: 4s;
+        }
+        .glow {
+            box-shadow: 0 0 40px -10px rgba(59, 130, 246, 0.5);
+        }
+        .bg-mesh {
+            background-color: #020617;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(168, 85, 247, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.1) 0px, transparent 50%);
+        }
+    </style>
+</head>
+<body class="bg-mesh font-sans text-slate-300 overflow-x-hidden">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center"> 
+                    <a href="index.html" class="text-2xl font-bold tracking-tight text-white">Earn<span class="text-blue-600">Point</span></a>
+                </div>
+                <div class="hidden md:flex space-x-8 items-center text-sm font-semibold">
+                    <a href="index.html" class="text-blue-600 transition">Home</a>
+                    <a href="#how-it-works" class="text-slate-600 hover:text-blue-600 transition">How it Works</a>
+                    <a href="#faq" class="text-slate-600 hover:text-blue-600 transition">About & FAQ</a>
+                </div>
+                <div class="flex items-center space-x-4 text-sm font-bold">
+                    <a href="registration.html" class="bg-blue-600 text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition">Get Started</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Premium Hero Section -->
+    <header class="relative pt-20 pb-32 lg:pt-32 lg:pb-52">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <!-- Text Content -->
+                <div class="z-10">
+                    <div class="inline-flex items-center space-x-2 bg-blue-600/10 border border-blue-500/20 rounded-full px-4 py-1.5 mb-6">
+                        <span class="relative flex h-2 w-2">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                        </span>
+                        <span class="text-blue-400 text-[10px] font-bold uppercase tracking-widest">v2.0 Now Live</span>
+                    </div>
+                    <h1 class="text-5xl md:text-7xl font-black text-white leading-tight mb-8">
+                        The Next Gen <br>
+                        <span class="gradient-text">Earning Protocol.</span>
+                    </h1>
+                    <p class="text-lg text-slate-400 max-w-lg mb-10 leading-relaxed">
+                        Experience the most sophisticated freelance rewards ecosystem. Complete tasks, answer surveys, and grow your network on a platform built for the future of work.
+                    </p>
+                    <div class="flex flex-wrap gap-4">
+                        <a href="registration.html" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-2xl font-bold transition shadow-lg shadow-blue-900/40 active:scale-95">
+                            Get Started
+                        </a>
+                        <a href="#how-it-works" class="glass text-white px-8 py-4 rounded-2xl font-bold hover:bg-white/5 transition active:scale-95">
+                            Learn More
+                        </a>
+                    </div>
+                    
+                    <!-- Stats Badge -->
+                    <div class="mt-16 grid grid-cols-3 gap-8">
+                        <div>
+                            <p class="text-2xl font-bold text-white">10K+</p>
+                            <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Active Users</p>
+                        </div>
+                        <div>
+                            <p class="text-2xl font-bold text-white">Ksh 5M+</p>
+                            <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Paid Out</p>
+                        </div>
+                        <div>
+                            <p class="text-2xl font-bold text-white">4.9/5</p>
+                            <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">User Rating</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Smartphone Showcase -->
+                <div class="relative phone-perspective h-[500px] md:h-[600px] mt-12 lg:mt-0 scale-[0.6] sm:scale-[0.8] lg:scale-100 origin-center lg:origin-right">
+                    <!-- Phone 1: Dashboard (Center) -->
+                    <div class="absolute left-1/2 top-0 -translate-x-1/2 w-[280px] h-[580px] rounded-[3rem] border-[8px] border-slate-800 bg-slate-950 glow phone-rotate animate-float z-30 overflow-hidden">
+                        <div class="p-6">
+                            <div class="flex justify-between items-center mb-8">
+                                <div class="w-8 h-8 rounded-full bg-blue-600"></div>
+                                <i class="fas fa-bell text-slate-700"></i>
+                            </div>
+                            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Main Dashboard</p>
+                            <h4 class="text-xl font-bold text-white mt-1">Ksh 42,500</h4>
+                            <div class="mt-8 space-y-4">
+                                <div class="h-32 bg-blue-600/10 rounded-2xl border border-blue-500/10 flex items-center justify-center">
+                                    <i class="fas fa-chart-area text-blue-500 text-3xl"></i>
+                                </div>
+                                <div class="h-16 bg-white/5 rounded-2xl border border-white/5"></div>
+                                <div class="h-16 bg-white/5 rounded-2xl border border-white/5"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Phone 2: Surveys (Left) -->
+                    <div class="absolute left-0 top-20 w-[240px] h-[500px] rounded-[2.5rem] border-[6px] border-slate-800 bg-slate-950 opacity-80 phone-rotate animate-float-delayed z-20 overflow-hidden">
+                        <div class="p-5">
+                            <div class="flex items-center space-x-2 mb-6">
+                                <i class="fas fa-poll text-purple-500"></i>
+                                <span class="text-xs font-bold text-white">Surveys</span>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="p-3 bg-purple-600/10 border border-purple-500/10 rounded-xl">
+                                    <div class="h-2 w-20 bg-purple-500/40 rounded mb-2"></div>
+                                    <div class="h-1.5 w-full bg-slate-800 rounded"></div>
+                                </div>
+                                <div class="p-3 bg-white/5 rounded-xl">
+                                    <div class="h-2 w-16 bg-slate-700 rounded mb-2"></div>
+                                    <div class="h-1.5 w-full bg-slate-800 rounded"></div>
+                                </div>
+                                <div class="p-3 bg-white/5 rounded-xl">
+                                    <div class="h-2 w-24 bg-slate-700 rounded mb-2"></div>
+                                    <div class="h-1.5 w-full bg-slate-800 rounded"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Phone 3: Rewards (Right) -->
+                    <div class="absolute right-0 top-10 w-[240px] h-[500px] rounded-[2.5rem] border-[6px] border-slate-800 bg-slate-950 opacity-80 phone-rotate animate-float-fast z-10 overflow-hidden">
+                        <div class="p-5">
+                            <div class="flex items-center space-x-2 mb-6 text-cyan-400">
+                                <i class="fas fa-video"></i>
+                                <span class="text-xs font-bold text-white">Video Tasks</span>
+                            </div>
+                            <div class="h-32 bg-cyan-600/10 rounded-xl mb-4 flex items-center justify-center">
+                                <i class="fas fa-play text-cyan-500 text-2xl"></i>
+                            </div>
+                            <div class="h-3 w-full bg-slate-900 rounded-full overflow-hidden">
+                                <div class="h-full w-2/3 bg-cyan-500"></div>
+                            </div>
+                            <p class="text-[10px] text-slate-500 mt-2">Earn Ksh 10.00 / min</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Feature Detailed Grid -->
+    <section id="how-it-works" class="py-24 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-20">
+                <h2 class="text-4xl font-bold text-white mb-4">Core Ecosystem</h2>
+                <p class="text-slate-500 text-sm max-w-lg mx-auto leading-relaxed">Everything you need to scale your side hustle into a professional stream of income.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- User Dashboard -->
+                <div class="glass p-8 rounded-[2rem] hover:bg-white/5 transition border-white/10">
+                    <i class="fas fa-layer-group text-blue-500 text-2xl mb-6"></i>
+                    <h3 class="text-lg font-bold text-white mb-2">Pro Dashboard</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed">Real-time tracking of every Ksh earned across all tasks and network activity.</p>
+                </div>
+                <!-- Surveys -->
+                <div class="glass p-8 rounded-[2rem] hover:bg-white/5 transition border-white/10">
+                    <i class="fas fa-clipboard-list text-purple-500 text-2xl mb-6"></i>
+                    <h3 class="text-lg font-bold text-white mb-2">High-Yield Surveys</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed">Exclusive access to global research surveys that pay more per minute.</p>
+                </div>
+                <!-- Video Watching -->
+                <div class="glass p-8 rounded-[2rem] hover:bg-white/5 transition border-white/10">
+                    <i class="fab fa-youtube text-red-500 text-2xl mb-6"></i>
+                    <h3 class="text-lg font-bold text-white mb-2">Video Rewards</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed">Monetize your screen time by watching premium advertisements and content.</p>
+                </div>
+                <!-- Referral -->
+                <div class="glass p-8 rounded-[2rem] hover:bg-white/5 transition border-white/10">
+                    <i class="fas fa-network-wired text-cyan-500 text-2xl mb-6"></i>
+                    <h3 class="text-lg font-bold text-white mb-2">Tiered Referrals</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed">Earn commissions up to 3 levels deep as your invited network grows.</p>
+                </div>
+                <!-- Withdrawal -->
+                <div class="glass p-8 rounded-[2rem] hover:bg-white/5 transition border-white/10">
+                    <i class="fas fa-money-bill-transfer text-emerald-500 text-2xl mb-6"></i>
+                    <h3 class="text-lg font-bold text-white mb-2">Instant Payouts</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed">Direct withdrawal system for M-Pesa and PayPal with zero friction.</p>
+                </div>
+                <!-- Stats -->
+                <div class="glass p-8 rounded-[2rem] hover:bg-white/5 transition border-white/10">
+                    <i class="fas fa-microchip text-slate-400 text-2xl mb-6"></i>
+                    <h3 class="text-lg font-bold text-white mb-2">Neural Analytics</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed">Detailed stats on your performance, ranking, and projected monthly yield.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Proof Section -->
+    <section class="py-24 glass border-y border-white/5 relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <h2 class="text-sm font-bold text-blue-500 uppercase tracking-[0.3em] mb-12">Verified Success</h2>
+            <div id="safe-hands-container" class="min-h-[150px] flex items-center justify-center">
+                <div id="safe-hands-ticker" class="transition-all duration-700 opacity-0 transform translate-y-4">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About & FAQ Section -->
+    <section id="faq" class="py-24 relative">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-black text-white mb-4">Frequently Asked Questions</h2>
+                <p class="text-slate-500 text-sm">Everything you need to know about the EarnPoint protocol.</p>
+            </div>
+
+            <div class="space-y-6">
+                <div class="glass p-6 rounded-3xl border-white/10">
+                    <h3 class="text-white font-bold mb-2">What is EarnPoint?</h3>
+                    <p class="text-slate-400 text-xs leading-relaxed">EarnPoint is a premium freelance and rewards ecosystem designed to help users monetize their time through various tasks, surveys, and network growth opportunities.</p>
+                </div>
+
+                <div class="glass p-6 rounded-3xl border-white/10">
+                    <h3 class="text-white font-bold mb-2">How do I start earning?</h3>
+                    <p class="text-slate-400 text-xs leading-relaxed">Simply create an account, activate it by paying the nominal protocol fee, and you'll get immediate access to our task dashboard, including high-yield surveys and video rewards.</p>
+                </div>
+
+                <div class="glass p-6 rounded-3xl border-white/10">
+                    <h3 class="text-white font-bold mb-2">Why is there an activation fee?</h3>
+                    <p class="text-slate-400 text-xs leading-relaxed">The activation fee ensures a high-quality user base and helps sustain our 3-tier referral commission structure, allowing us to reward members who help grow the ecosystem.</p>
+                </div>
+
+                <div class="glass p-6 rounded-3xl border-white/10">
+                    <h3 class="text-white font-bold mb-2">How does the referral system work?</h3>
+                    <p class="text-slate-400 text-xs leading-relaxed">We utilize a 3-level commission protocol. You earn 10% from direct referrals (Level 1), 5% from their referrals (Level 2), and 2% from the next tier (Level 3).</p>
+                </div>
+
+                <div class="glass p-6 rounded-3xl border-white/10">
+                    <h3 class="text-white font-bold mb-2">How can I withdraw my earnings?</h3>
+                    <p class="text-slate-400 text-xs leading-relaxed">Withdrawals are processed directly to your registered M-Pesa account. Simply reach the minimum threshold and request a payout from your dashboard.</p>
+                </div>
+
+                <div class="glass p-6 rounded-3xl border-white/10">
+                    <h3 class="text-white font-bold mb-2">Is my data secure?</h3>
+                    <p class="text-slate-400 text-xs leading-relaxed">Yes. We use industry-standard TLS 1.3 encryption and secure PostgreSQL database protocols to ensure your personal information and transaction history remain confidential.</p>
+                </div>
+            </div>
+
+            <div class="mt-12 text-center">
+                <p class="text-slate-500 text-xs">Still have questions? <a href="https://wa.me/254768734824" class="text-blue-500 font-bold hover:underline">Contact Support</a></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="py-32 relative overflow-hidden">
+        <div class="absolute inset-0 bg-blue-600 opacity-10 blur-3xl rounded-full scale-150"></div>
+        <div class="max-w-4xl mx-auto px-4 text-center relative z-10">
+            <h2 class="text-4xl md:text-6xl font-black text-white mb-8">Ready to evolve?</h2>
+            <p class="text-slate-400 mb-12 text-lg">Join thousands of high-performers earning daily rewards on SmartEarn.</p>
+            <div class="flex flex-col sm:flex-row justify-center gap-6">
+                <a href="registration.html" class="bg-blue-600 hover:bg-blue-700 text-white px-12 py-5 rounded-2xl font-bold text-xl transition shadow-2xl shadow-blue-900/40 active:scale-95">
+                    Join Now
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-[#020617] text-slate-500 py-12 border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p>&copy; 2026 EarnPoint Freelance Inc. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        const tickerData = [
+            { name: "John Kamau", county: "Nairobi", comment: "Just received my first Ksh 5,000 payout! This is legit." },
+            { name: "Mary Atieno", county: "Kisumu", comment: "The referral commissions are amazing. Highly recommend!" },
+            { name: "Brian Otieno", county: "Mombasa", comment: "Best platform for passive income in Kenya right now." },
+            { name: "Faith Wanjiru", county: "Kiambu", comment: "Love the lucky spin, won Ksh 50 today!" },
+            { name: "Kevin Wafula", county: "Bungoma", comment: "Simple, transparent, and rewarding. Highly recommend." },
+            { name: "Mercy Chebet", county: "Nakuru", comment: "EarnPoint is a life changer for students." },
+            { name: "Evans Mutua", county: "Machakos", comment: "Professional portal and fast customer support." },
+            { name: "Esther Nyambura", county: "Nyeri", comment: "The YouTube rewards are so easy to complete." },
+            { name: "David Onyango", county: "Siaya", comment: "Smooth withdrawals to M-Pesa. No delays." },
+            { name: "Joyce Njeri", county: "Murang'a", comment: "I've built a network of 50 people in one week!" }
+        ];
+
+        // Generate 95 more entries to ensure > 100
+        const firstNames = ["James", "Lucy", "Samuel", "Grace", "Peter", "Sarah", "Michael", "Emily", "Anthony", "Rose", "Simon", "Alice", "Daniel", "Priscila", "George"];
+        const lastNames = ["Mwangi", "Maina", "Kariuki", "Githu", "Kimani", "Njuguna", "Mwaura", "Waweru", "Nyambura", "Wambui", "Wangui", "Gachagua"];
+        const kenyanCounties = ["Uasin Gishu", "Kajiado", "Meru", "Kilifi", "Kakamega", "Kericho", "Bomet", "Embu", "Kitui", "Makueni", "Laikipia", "Narok", "Vihiga", "Busia", "Homa Bay", "Migori", "Kisii", "Nyamira", "Garissa", "Wajir", "Mandera"];
+        const genericComments = ["Making money daily here!", "Transparent and reliable.", "Great side hustle.", "Loving the interface.", "Easy way to earn extra cash.", "The best network system.", "Spin and win is addictive!", "Highly recommended to everyone.", "Fastest payouts ever.", "Truly professional platform."];
+
+        for (let i = 0; i < 95; i++) {
+            tickerData.push({
+                name: `${firstNames[i % firstNames.length]} ${lastNames[i % lastNames.length]}`,
+                county: kenyanCounties[i % kenyanCounties.length],
+                comment: genericComments[i % genericComments.length]
+            });
+        }
+
+        let currentIndex = 0;
+        const tickerEl = document.getElementById('safe-hands-ticker');
+
+        function updateTicker() {
+            const user = tickerData[currentIndex];
+            
+            // Start fade out
+            tickerEl.classList.add('opacity-0', 'translate-y-4');
+            
+            setTimeout(() => {
+                tickerEl.innerHTML = `
+                    <div class="bg-white/5 border border-white/10 p-6 rounded-3xl backdrop-blur-md max-w-lg shadow-xl">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center space-x-2">
+                                <span class="relative flex h-3 w-3">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                                </span>
+                                <span class="text-green-500 text-[10px] font-bold uppercase tracking-widest">Online Now</span>
+                            </div>
+                            <span class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">${user.county}, Kenya</span>
+                        </div>
+                        <p class="text-white font-bold mb-1 text-sm">${user.name}</p>
+                        <p class="text-slate-400 text-xs italic">"${user.comment}"</p>
+                    </div>
+                `;
+                // Trigger fade in
+                tickerEl.classList.remove('opacity-0', 'translate-y-4');
+                currentIndex = (currentIndex + 1) % tickerData.length;
+            }, 700);
+        }
+
+        updateTicker();
+        setInterval(updateTicker, 5000);
+    </script>
+
+</body>
+</html>

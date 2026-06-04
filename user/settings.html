@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Settings | EarnPoint</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-[#020617] font-sans text-slate-300">
+
+    <!-- Animated Balloon Background -->
+    <canvas id="balloon-canvas" class="fixed inset-0 z-[-1] pointer-events-none"></canvas>
+
+    <!-- Mobile Sidebar Toggle Button -->
+    <button id="mobile-toggle" class="md:hidden fixed top-6 left-6 z-[60] w-12 h-12 flex items-center justify-center bg-slate-900/90 border border-white/10 rounded-2xl text-blue-500 shadow-2xl active:scale-90 transition-all backdrop-blur-md">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 7h16M4 12h10M4 17h16"></path>
+        </svg>
+    </button>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden md:hidden transition-opacity duration-300"></div>
+
+    <div class="flex min-h-screen relative">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-slate-950/50 backdrop-blur-xl border-r border-white/10 text-slate-400 fixed md:sticky inset-y-0 left-0 z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col flex-shrink-0">
+            <div class="p-6">
+                <span class="text-2xl font-bold text-white">Earn<span class="text-blue-500">Point</span></span>
+            </div>
+            <nav class="flex-1 px-4 space-y-1 mt-4">
+                <a href="dashboard.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-chart-pie w-5"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="spin.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-dharmachakra w-5"></i>
+                    <span>Lucky Spin</span>
+                </a>
+                <a href="youtubevideos.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fab fa-youtube w-5"></i>
+                    <span>YouTube Rewards</span>
+                </a>
+                <a href="surveys.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-poll-h w-5"></i>
+                    <span>Surveys</span>
+                </a>
+                <a href="refferals.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-users w-5"></i>
+                    <span>Referrals</span>
+                </a>
+                <a href="wallet.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-wallet w-5"></i>
+                    <span>Withdraw</span>
+                </a>
+                <a href="membership.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-crown w-5"></i>
+                    <span>Membership</span>
+                </a>
+                <a href="settings.html" class="flex items-center space-x-3 bg-blue-600 text-white p-3 rounded-xl transition">
+                    <i class="fas fa-cog w-5"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+            <div class="p-4 border-t border-white/10">
+                <div class="flex items-center space-x-3 p-2">
+                    <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs">JD</div>
+                    <div class="text-xs">
+                        <p id="sidebar-name" class="text-white font-bold">Loading...</p>
+                        <p id="sidebar-role" class="text-slate-500 text-[10px] uppercase font-bold tracking-tighter">User</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6 md:p-10">
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-white">Account Settings</h1>
+            <p class="text-slate-500">Manage your profile, roles, and security preferences.</p>
+        </header>
+
+        <div class="grid md:grid-cols-4 gap-8">
+            <!-- Left Navigation (Tabs) -->
+            <nav class="space-y-2">
+                <button onclick="showSection('profile')" id="tab-profile" class="w-full flex items-center space-x-3 bg-white/5 border border-white/10 text-white p-3 rounded-2xl font-bold backdrop-blur-md transition">
+                    <i class="fas fa-user-circle w-5"></i>
+                    <span>Profile Info</span>
+                </button>
+                <button onclick="showSection('security')" id="tab-security" class="w-full flex items-center space-x-3 text-slate-500 hover:bg-white/5 p-3 rounded-2xl transition">
+                    <i class="fas fa-shield-alt w-5"></i>
+                    <span>Security</span>
+                </button>
+                <a href="#" class="flex items-center space-x-3 text-slate-500 hover:bg-white/5 p-3 rounded-2xl transition">
+                    <i class="fas fa-bell w-5"></i>
+                    <span>Notifications</span>
+                </a>
+            </nav>
+
+            <!-- Main Settings Area -->
+            <div class="md:col-span-3 space-y-8">
+                <div id="section-profile" class="space-y-8">
+                    <!-- Section: User Role Card -->
+                    <div class="bg-gradient-to-r from-slate-900 to-slate-800 rounded-[2rem] p-8 text-white shadow-2xl border border-white/10">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Account Role</p>
+                                <h2 class="text-2xl font-bold flex items-center">
+                                    Premium Freelancer 
+                                    <span class="ml-3 bg-blue-500 text-[10px] px-2 py-1 rounded-md uppercase">Verified</span>
+                                </h2>
+                            </div>
+                            <i class="fas fa-award text-5xl text-amber-400/20"></i>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-white/10 flex space-x-6 text-sm">
+                            <span class="flex items-center"><i class="fas fa-check-circle text-green-400 mr-2"></i> 100% Ad Revenue</span>
+                            <span class="flex items-center"><i class="fas fa-check-circle text-green-400 mr-2"></i> L3 Network Access</span>
+                        </div>
+                    </div>
+
+                    <!-- Section: Profile Photo -->
+                    <div class="bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 p-8">
+                        <h3 class="text-lg font-bold mb-6 text-white">Profile Photo</h3>
+                        <div class="flex flex-col md:flex-row items-center gap-8">
+                            <div class="relative group">
+                                <div id="photo-container" class="w-32 h-32 rounded-full border-4 border-blue-600/30 overflow-hidden bg-slate-800 flex items-center justify-center">
+                                    <img id="profile-preview" src="" alt="Profile Preview" class="w-full h-full object-cover hidden">
+                                    <i id="profile-icon" class="fas fa-user text-4xl text-slate-600"></i>
+                                </div>
+                                <label for="photo-upload" class="absolute bottom-0 right-0 w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center cursor-pointer hover:bg-blue-700 transition shadow-lg">
+                                    <i class="fas fa-camera text-white text-sm"></i>
+                                </label>
+                                <input type="file" id="photo-upload" accept="image/*" class="hidden">
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm text-slate-400 mb-4">Update your profile picture to unlock earning tasks and withdrawal features.</p>
+                                <button id="upload-photo-btn" class="bg-blue-600 text-white px-6 py-2 rounded-2xl font-bold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                    Save Photo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section: Personal Information -->
+                    <div class="bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 p-8">
+                        <h3 class="text-lg font-bold mb-6 text-white">Personal Information</h3>
+                        <form class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Full Name</label>
+                                <input id="settings-fullname" type="text" value="Loading..." class="w-full bg-white/5 border border-white/10 rounded-2xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Email Address</label>
+                                <input id="settings-email" type="email" value="loading@example.com" disabled class="w-full bg-white/5 border border-white/10 rounded-2xl py-3 px-4 text-slate-600 cursor-not-allowed">
+                                <p class="mt-1 text-[10px] text-blue-400 font-medium italic">Email verified via Google</p>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Phone Number</label>
+                                <input id="settings-phone" type="text" value="+254" placeholder="+254 7xx xxx xxx" class="w-full bg-white/5 border border-white/10 rounded-2xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white placeholder-slate-600">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Country</label>
+                                <select id="settings-country" class="w-full bg-white/5 border border-white/10 rounded-2xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white">
+                                    <option>United States</option>
+                                    <option selected>Kenya</option>
+                                    <option>United Kingdom</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-2 pt-4">
+                                <button type="submit" class="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold hover:bg-blue-700 transition shadow-xl shadow-blue-900/20">
+                                    Save Changes
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Section: Danger Zone -->
+                    <div class="bg-red-500/10 backdrop-blur-md rounded-3xl border border-red-500/20 p-8">
+                        <h3 class="text-lg font-bold text-red-400 mb-2">Danger Zone</h3>
+                        <p class="text-sm text-slate-500 mb-6">Once you delete your account, there is no going back. All earnings will be permanently wiped.</p>
+                        <button class="bg-red-600 text-white px-6 py-2 rounded-2xl font-bold hover:bg-red-700 transition">
+                            Delete My Account
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Section: Security Information -->
+                <div id="section-security" class="hidden space-y-8">
+                    <div class="bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 p-8">
+                        <h3 class="text-lg font-bold mb-6 text-white">Change Password</h3>
+                        <form id="change-password-form" class="space-y-6 max-w-md">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Current Password</label>
+                                <input type="password" id="current-password" required class="w-full bg-white/5 border border-white/10 rounded-2xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">New Password</label>
+                                <input type="password" id="new-password" required class="w-full bg-white/5 border border-white/10 rounded-2xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Confirm New Password</label>
+                                <input type="password" id="confirm-new-password" required class="w-full bg-white/5 border border-white/10 rounded-2xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white">
+                            </div>
+                            <div class="pt-4">
+                                <button type="submit" class="bg-blue-600 text-white px-8 py-3 rounded-2xl font-bold hover:bg-blue-700 transition shadow-xl shadow-blue-900/20">
+                                    Update Password
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </main>
+    </div>
+
+    <script>
+        // Mobile Sidebar Functionality
+        const sidebar = document.getElementById('sidebar');
+        const mobileToggle = document.getElementById('mobile-toggle');
+        const overlay = document.getElementById('sidebar-overlay');
+
+        function toggleSidebar() {
+            const isOpen = sidebar.classList.contains('translate-x-0');
+            if (isOpen) {
+                sidebar.classList.replace('translate-x-0', '-translate-x-full');
+                overlay.classList.add('hidden');
+                overlay.style.opacity = '0';
+            } else {
+                sidebar.classList.replace('-translate-x-full', 'translate-x-0');
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.style.opacity = '1', 10);
+            }
+        }
+
+        mobileToggle.addEventListener('click', toggleSidebar);
+        overlay.addEventListener('click', toggleSidebar);
+
+        const token = localStorage.getItem('token');
+
+        // Redirect if not logged in
+        if (!token) {
+            window.location.href = 'login.html';
+        }
+
+        // Fetch user data on load to update personal information
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const response = await fetch('/api/users/profile', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) throw new Error('Failed to fetch profile');
+
+                const user = await response.json();
+
+                // Reflect Profile Data
+                document.getElementById('sidebar-name').innerText = user.full_name;
+                if (user.membership_name) {
+                    document.getElementById('sidebar-role').innerText = `${user.membership_name} Member`;
+                }
+
+                // Reflect Photo
+                if (user.profile_photo) {
+                    const preview = document.getElementById('profile-preview');
+                    preview.src = user.profile_photo;
+                    preview.classList.remove('hidden');
+                    document.getElementById('profile-icon').classList.add('hidden');
+                    
+                    const sidebarInitials = document.querySelector('.w-8.h-8.rounded-full.bg-blue-500');
+                    if (sidebarInitials) {
+                        sidebarInitials.innerHTML = `<img src="${user.profile_photo}" class="w-full h-full rounded-full object-cover">`;
+                        sidebarInitials.className = "w-8 h-8 rounded-full overflow-hidden";
+                    }
+                }
+
+                // Populate Personal Information Fields
+                document.getElementById('settings-fullname').value = user.full_name;
+                document.getElementById('settings-email').value = user.email;
+                document.getElementById('settings-phone').value = user.phone_number || '+254';
+                if (user.country) {
+                    document.getElementById('settings-country').value = user.country;
+                }
+
+            } catch (error) {
+                console.error('Error fetching profile:', error);
+            }
+        });
+
+        // Profile Photo Handling
+        const photoInput = document.getElementById('photo-upload');
+        const uploadBtn = document.getElementById('upload-photo-btn');
+        const preview = document.getElementById('profile-preview');
+        const icon = document.getElementById('profile-icon');
+
+        photoInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    preview.src = event.target.result;
+                    preview.classList.remove('hidden');
+                    icon.classList.add('hidden');
+                    uploadBtn.disabled = false;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        uploadBtn.addEventListener('click', async () => {
+            const base64Photo = preview.src;
+            try {
+                const res = await fetch('/api/users/update-photo', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ profilePhoto: base64Photo })
+                });
+                if (res.ok) {
+                    alert('Profile photo updated successfully!');
+                    location.reload();
+                } else {
+                    const data = await res.json();
+                    alert(data.message || 'Update failed');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('An error occurred during upload.');
+            }
+        });
+
+        function showSection(sectionId) {
+            // Hide all sections
+            document.getElementById('section-profile').classList.add('hidden');
+            document.getElementById('section-security').classList.add('hidden');
+            
+            // Show requested section
+            document.getElementById(`section-${sectionId}`).classList.remove('hidden');
+
+            // Update Tab Styles
+            const profileTab = document.getElementById('tab-profile');
+            const securityTab = document.getElementById('tab-security');
+
+            if (sectionId === 'profile') {
+                profileTab.className = "w-full flex items-center space-x-3 bg-white/5 border border-white/10 text-white p-3 rounded-2xl font-bold backdrop-blur-md transition";
+                securityTab.className = "w-full flex items-center space-x-3 text-slate-500 hover:bg-white/5 p-3 rounded-2xl transition";
+            } else {
+                securityTab.className = "w-full flex items-center space-x-3 bg-white/5 border border-white/10 text-white p-3 rounded-2xl font-bold backdrop-blur-md transition";
+                profileTab.className = "w-full flex items-center space-x-3 text-slate-500 hover:bg-white/5 p-3 rounded-2xl transition";
+            }
+        }
+
+        document.getElementById('change-password-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const currentPassword = document.getElementById('current-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmNewPassword = document.getElementById('confirm-new-password').value;
+
+            if (newPassword !== confirmNewPassword) {
+                alert("New passwords do not match!");
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/users/change-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ currentPassword, newPassword })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    alert("Password updated successfully!");
+                    e.target.reset();
+                } else {
+                    alert(data.message || "Failed to update password");
+                }
+            } catch (error) {
+                console.error("Change password error:", error);
+                alert("An error occurred. Please try again.");
+            }
+        });
+
+        // Balloon Background Logic
+        const canvas = document.getElementById('balloon-canvas');
+        const ctx = canvas.getContext('2d');
+        let balloons = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Balloon {
+            constructor() {
+                this.radius = 25; // 50px diameter
+                this.x = Math.random() * (canvas.width - this.radius * 2) + this.radius;
+                this.y = Math.random() * (canvas.height - this.radius * 2) + this.radius;
+                this.dx = (Math.random() - 0.5) * 2; // Random velocity X
+                this.dy = (Math.random() - 0.5) * 2; // Random velocity Y
+                this.color = `hsla(${Math.random() * 360}, 70%, 60%, 0.3)`;
+            }
+
+            draw() {
+                ctx.beginPath();
+                // Draw the balloon body
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                
+                // Draw the highlight/shine for a 3D effect
+                ctx.beginPath();
+                ctx.arc(this.x - this.radius/3, this.y - this.radius/3, this.radius/4, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+                ctx.fill();
+
+                // Draw the small triangle at the bottom
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y + this.radius);
+                ctx.lineTo(this.x - 5, this.y + this.radius + 10);
+                ctx.lineTo(this.x + 5, this.y + this.radius + 10);
+                ctx.closePath();
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+
+            update(others) {
+                // Collision detection with edges
+                if (this.x + this.radius > canvas.width || this.x - this.radius < 0) {
+                    this.dx = -this.dx;
+                }
+                if (this.y + this.radius > canvas.height || this.y - this.radius < 0) {
+                    this.dy = -this.dy;
+                }
+
+                // Collision detection with other balloons
+                for (let other of others) {
+                    if (this === other) continue;
+                    const dx = other.x - this.x;
+                    const dy = other.y - this.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < this.radius + other.radius) {
+                        // Simple elastic collision (velocity swap)
+                        const tempDx = this.dx;
+                        const tempDy = this.dy;
+                        this.dx = other.dx;
+                        this.dy = other.dy;
+                        other.dx = tempDx;
+                        other.dy = tempDy;
+
+                        // Prevent balloons from sticking together by resolving overlap
+                        const overlap = (this.radius + other.radius - distance) / 2;
+                        this.x -= (dx / distance) * overlap;
+                        this.y -= (dy / distance) * overlap;
+                    }
+                }
+
+                this.x += this.dx;
+                this.y += this.dy;
+
+                this.draw();
+            }
+        }
+
+        function initBalloons() {
+            balloons = [];
+            for (let i = 0; i < 50; i++) {
+                balloons.push(new Balloon());
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            balloons.forEach(balloon => balloon.update(balloons));
+            requestAnimationFrame(animate);
+        }
+
+        initBalloons();
+        animate();
+    </script>
+</body>
+</html>

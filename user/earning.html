@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Earnings | EarnPoint</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-[#020617] font-sans text-slate-300">
+
+    <!-- Animated Balloon Background -->
+    <canvas id="balloon-canvas" class="fixed inset-0 z-[-1] pointer-events-none"></canvas>
+
+    <!-- Mobile Sidebar Toggle Button -->
+    <button id="mobile-toggle" class="md:hidden fixed top-6 left-6 z-[60] w-12 h-12 flex items-center justify-center bg-slate-900/90 border border-white/10 rounded-2xl text-blue-500 shadow-2xl active:scale-90 transition-all backdrop-blur-md">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 7h16M4 12h10M4 17h16"></path>
+        </svg>
+    </button>
+
+    <div class="flex min-h-screen relative">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-slate-950/50 backdrop-blur-xl border-r border-white/10 text-slate-400 fixed md:sticky inset-y-0 left-0 z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col flex-shrink-0">
+            <div class="p-6">
+                <span class="text-2xl font-bold text-white">Earn<span class="text-blue-500">Point</span></span>
+            </div>
+            <nav class="flex-1 px-4 space-y-1 mt-4">
+                <a href="dashboard.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-chart-pie w-5"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="wallet.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-wallet w-5"></i>
+                    <span>Withdraw</span>
+                </a>
+                <a href="refferals.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-users w-5"></i>
+                    <span>Referrals</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6 md:p-10">
+            <header class="mb-10">
+                <h1 class="text-3xl font-bold text-white">Your Earnings</h1>
+                <p class="text-slate-500 text-sm">Detailed overview of your daily and total revenue.</p>
+            </header>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-white/5 backdrop-blur-md p-8 rounded-3xl border border-white/10">
+                    <p class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-2">Today's Revenue</p>
+                    <h2 class="text-4xl font-extrabold text-white">Ksh 150.00</h2>
+                </div>
+                <div class="bg-white/5 backdrop-blur-md p-8 rounded-3xl border border-white/10">
+                    <p class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-2">Total Earned</p>
+                    <h2 class="text-4xl font-extrabold text-white">Ksh 4,200.00</h2>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Mobile Sidebar Functionality
+        const sidebar = document.getElementById('sidebar');
+        const mobileToggle = document.getElementById('mobile-toggle');
+        mobileToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('-translate-x-full');
+        });
+
+        // Balloon Background Logic
+        const canvas = document.getElementById('balloon-canvas');
+        const ctx = canvas.getContext('2d');
+        let balloons = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Balloon {
+            constructor() {
+                this.radius = 25; // 50px diameter (radius * 2)
+                this.x = Math.random() * (canvas.width - this.radius * 2) + this.radius;
+                this.y = Math.random() * (canvas.height - this.radius * 2) + this.radius;
+                this.dx = (Math.random() - 0.5) * 3; // Random velocity X
+                this.dy = (Math.random() - 0.5) * 3; // Random velocity Y
+                this.color = `hsla(${Math.random() * 360}, 70%, 60%, 0.3)`;
+            }
+
+            draw() {
+                ctx.beginPath();
+                // Draw the balloon body
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                
+                // Draw the highlight/shine for a 3D effect
+                ctx.beginPath();
+                ctx.arc(this.x - this.radius/3, this.y - this.radius/3, this.radius/4, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+                ctx.fill();
+
+                // Draw the small triangle at the bottom
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y + this.radius);
+                ctx.lineTo(this.x - 5, this.y + this.radius + 10);
+                ctx.lineTo(this.x + 5, this.y + this.radius + 10);
+                ctx.closePath();
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+
+            update() {
+                // Collision detection with edges
+                if (this.x + this.radius > canvas.width || this.x - this.radius < 0) {
+                    this.dx = -this.dx;
+                }
+                if (this.y + this.radius > canvas.height || this.y - this.radius < 0) {
+                    this.dy = -this.dy;
+                }
+
+                this.x += this.dx;
+                this.y += this.dy;
+
+                this.draw();
+            }
+        }
+
+        function initBalloons() {
+            balloons = [];
+            for (let i = 0; i < 50; i++) {
+                balloons.push(new Balloon());
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            balloons.forEach(balloon => balloon.update());
+            requestAnimationFrame(animate);
+        }
+
+        initBalloons();
+        animate();
+    </script>
+</body>
+</html>

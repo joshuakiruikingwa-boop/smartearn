@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Portal | EarnPoint</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-[#020617] font-sans text-slate-300">
+    <script>
+        // Client-side authentication check
+        if (!localStorage.getItem('adminToken')) {
+            window.location.href = '/admin/login';
+        }
+    </script>
+
+    <!-- Animated Balloon Background -->
+    <canvas id="balloon-canvas" class="fixed inset-0 z-[-1] pointer-events-none"></canvas>
+
+    <!-- Mobile Sidebar Toggle -->
+    <button id="mobile-toggle" class="md:hidden fixed top-6 left-6 z-[60] w-12 h-12 flex items-center justify-center bg-slate-900/90 border border-white/10 rounded-2xl text-blue-500 shadow-2xl active:scale-90 transition-all backdrop-blur-md">
+        <i class="fas fa-bars text-xl"></i>
+    </button>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden md:hidden transition-opacity duration-300"></div>
+
+    <div class="flex min-h-screen relative">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-slate-950/50 backdrop-blur-xl border-r border-white/10 text-slate-400 fixed md:sticky inset-y-0 left-0 z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col flex-shrink-0">
+            <div class="p-6">
+                <span class="text-2xl font-bold text-white">Admin<span class="text-blue-500">Point</span></span>
+            </div>
+            <nav class="flex-1 px-4 space-y-1 mt-4">
+                <a href="admindashboard.html" class="flex items-center space-x-3 bg-blue-600 text-white p-3 rounded-xl transition">
+                    <i class="fas fa-chart-line w-5"></i>
+                    <span>Overview</span>
+                </a>
+                <a href="adminusermanagement.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-users-cog w-5"></i>
+                    <span>User Management</span>
+                </a>
+                <a href="adminpayouts.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-hand-holding-dollar w-5"></i>
+                    <span>Payout Requests</span>
+                </a>
+                <a href="adminpayments.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-credit-card w-5"></i>
+                    <span>Payment Settings</span>
+                </a>
+                <a href="adminsurveys.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-poll-h w-5"></i>
+                    <span>Surveys</span>
+                </a>
+                <a href="adminvideotasks.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fab fa-youtube w-5"></i>
+                    <span>Video Tasks</span>
+                </a>
+                <a href="adminsettings.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-cogs w-5"></i>
+                    <span>System Settings</span>
+                </a>
+            </nav>
+            <div class="p-4 border-t border-white/10">
+                <div class="flex items-center space-x-3 p-2">
+                    <div class="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold">AD</div>
+                    <div class="text-xs">
+                        <p class="text-white font-bold">System Admin</p>
+                        <p class="text-slate-500 text-[10px] uppercase font-bold tracking-tighter">Superuser</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6 md:p-10">
+            <header class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-white">Admin Dashboard</h1>
+                    <p class="text-slate-500 text-sm">Managing platform health and user distributions.</p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-bold transition">
+                        Generate Report
+                    </button>
+                    <button onclick="resetSystem()" class="bg-red-600/20 hover:bg-red-600 text-red-500 hover:text-white border border-red-600/30 px-4 py-2 rounded-xl text-sm font-bold transition">
+                        <i class="fas fa-trash-alt mr-2"></i> Reset System
+                    </button>
+                </div>
+            </header>
+
+            <!-- Admin Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                <div class="bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/10">
+                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Total Active Users</p>
+                    <h2 id="total-users" class="text-3xl font-extrabold text-white">0</h2>
+                    <p id="total-users-sub" class="text-green-400 text-[10px] mt-2 font-bold">Loading...</p>
+                </div>
+                <div class="bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/10">
+                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Pending Payouts</p>
+                    <h2 id="pending-payouts" class="text-3xl font-extrabold text-amber-500">Ksh 0.00</h2>
+                    <p id="pending-payouts-sub" class="text-slate-500 text-[10px] mt-2 font-bold">Loading...</p>
+                </div>
+                <div class="bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/10">
+                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Site Revenue</p>
+                    <h2 id="site-revenue" class="text-3xl font-extrabold text-white">Ksh 0.00</h2>
+                    <p id="site-revenue-sub" class="text-blue-400 text-[10px] mt-2 font-bold">Total Paid</p>
+                </div>
+                <div class="bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/10">
+                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Active Tasks</p>
+                    <h2 id="active-tasks" class="text-3xl font-extrabold text-white">0</h2>
+                    <p id="active-tasks-sub" class="text-slate-500 text-[10px] mt-2 font-bold">Surveys & Videos</p>
+                </div>
+            </div>
+
+            <!-- Charts Section (Using mock data as backend doesn't provide historical data) -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+                <div class="bg-white/5 backdrop-blur-md p-8 rounded-[2.5rem] border border-white/10">
+                    <h3 class="font-bold text-white mb-6">User Acquisition</h3>
+                    <div class="h-64">
+                        <canvas id="userGrowthChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white/5 backdrop-blur-md p-8 rounded-[2.5rem] border border-white/10">
+                    <h3 class="font-bold text-white mb-6">Payout Trends</h3>
+                    <div class="h-64">
+                        <canvas id="payoutChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Payout Requests Table (Using mock data, full table in adminpayouts.html) -->
+            <div class="bg-white/5 backdrop-blur-md rounded-[2.5rem] border border-white/10 overflow-hidden">
+                <div class="p-8 border-b border-white/10 flex justify-between items-center">
+                    <h3 class="font-bold text-white">Recent Payout Requests</h3>
+                    <a href="adminpayouts.html" class="text-blue-500 text-xs font-bold hover:underline">View All</a>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-white/5 text-[10px] uppercase font-bold text-slate-500 tracking-widest">
+                            <tr>
+                                <th class="px-8 py-4">User</th>
+                                <th class="px-8 py-4">Method</th>
+                                <th class="px-8 py-4 text-right">Amount</th>
+                                <th class="px-8 py-4 text-center">Status</th>
+                                <th class="px-8 py-4 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-payouts-body" class="divide-y divide-white/5"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:5000';
+
+        // Mobile Sidebar Functionality
+        const sidebar = document.getElementById('sidebar');
+        const mobileToggle = document.getElementById('mobile-toggle');
+        const overlay = document.getElementById('sidebar-overlay');
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+        mobileToggle.onclick = toggleSidebar;
+        overlay.onclick = toggleSidebar;
+
+        function renderRecentWithdrawals(withdrawals) {
+            const tbody = document.getElementById('recent-payouts-body');
+            tbody.innerHTML = '';
+            
+            if (withdrawals.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="px-8 py-10 text-center text-slate-500 italic">No recent requests.</td></tr>`;
+                return;
+            }
+
+            withdrawals.slice(0, 5).forEach(w => {
+                const statusColor = w.status === 'pending' ? 'bg-amber-500/10 text-amber-500' : 
+                                   w.status === 'completed' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-red-500/10 text-red-500';
+                
+                tbody.innerHTML += `
+                    <tr class="hover:bg-white/5 transition">
+                        <td class="px-8 py-4">
+                            <p class="text-white font-bold text-sm">${w.full_name}</p>
+                            <p class="text-[10px] text-slate-500">${w.phone_number || w.email}</p>
+                        </td>
+                        <td class="px-8 py-4 text-sm font-medium">${w.method}</td>
+                        <td class="px-8 py-4 text-right text-white font-bold">Ksh ${parseFloat(w.amount).toLocaleString()}</td>
+                        <td class="px-8 py-4 text-center">
+                            <span class="${statusColor} px-3 py-1 rounded-full text-[10px] font-bold uppercase">${w.status}</span>
+                        </td>
+                        <td class="px-8 py-4 text-right">
+                            <a href="adminpayouts.html" class="text-blue-500 hover:text-blue-400 font-bold text-xs">Manage</a>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Fetch Dashboard Stats
+        async function fetchDashboardStats() {
+            try {
+                const token = localStorage.getItem('adminToken');
+                const response = await fetch(`${API_BASE_URL}/admin/stats`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!response.ok) {
+                    if (response.status === 401) window.location.href = '/admin/login';
+                    throw new Error('Failed to fetch dashboard stats');
+                }
+                const data = await response.json();
+                const stats = data.stats;
+
+                document.getElementById('total-users').textContent = stats.activeUsers.toLocaleString();
+                document.getElementById('total-users-sub').textContent = `${stats.totalUsers.toLocaleString()} Total Users`;
+
+                document.getElementById('pending-payouts').textContent = `Ksh ${parseFloat(stats.pendingWithdrawals).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                // This requires fetching actual pending requests count, which is not in current stats.
+                // For now, we'll just show the amount.
+                document.getElementById('pending-payouts-sub').textContent = `Pending requests`; 
+
+                document.getElementById('site-revenue').textContent = `Ksh ${parseFloat(stats.totalPaid).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                document.getElementById('site-revenue-sub').textContent = `Total Paid`;
+
+                // Fetch active tasks count
+                const videosRes = await fetch(`${API_BASE_URL}/admin/videos`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const videosData = await videosRes.json();
+                const activeVideos = videosData.videos.filter(v => v.status === 'active').length;
+
+                const surveysRes = await fetch(`${API_BASE_URL}/admin/surveys`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const surveysData = await surveysRes.json();
+                const activeSurveys = surveysData.surveys.filter(s => s.status === 'active').length;
+
+                document.getElementById('active-tasks').textContent = (activeVideos + activeSurveys).toLocaleString();
+                document.getElementById('active-tasks-sub').textContent = `${activeSurveys} Surveys & ${activeVideos} Videos`;
+
+                // Fetch and render recent withdrawals
+                const withRes = await fetch(`${API_BASE_URL}/admin/withdrawals`, { headers: { 'Authorization': `Bearer ${token}` } });
+                if (withRes.ok) {
+                    const withData = await withRes.json();
+                    renderRecentWithdrawals(withData.withdrawals);
+                }
+
+            } catch (error) {
+                console.error('Error fetching dashboard stats:', error);
+            }
+        }
+
+        async function resetSystem() {
+            if (!confirm('CRITICAL WARNING: This will delete ALL users, payouts, and activity logs. This action cannot be undone. Proceed?')) {
+                return;
+            }
+            
+            try {
+                const token = localStorage.getItem('adminToken');
+                const response = await fetch(`${API_BASE_URL}/admin/reset`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    alert(data.message);
+                    window.location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Reset error:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchDashboardStats);
+
+        // Chart Logic (remains largely the same, using mock data for historical trends)
+        const chartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b', font: { size: 10 } } },
+                x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 10 } } }
+            }
+        };
+
+        new Chart(document.getElementById('userGrowthChart'), {
+            type: 'line',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [{
+                    data: [150, 230, 180, 290, 420, 380, 510],
+                    borderColor: '#3b82f6',
+                    tension: 0.4,
+                    fill: true,
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)'
+                }]
+            },
+            options: chartOptions
+        });
+
+        new Chart(document.getElementById('payoutChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [{
+                    data: [4500, 7200, 3800, 9100, 12000, 8500, 6000],
+                    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                    borderColor: '#3b82f6',
+                    borderWidth: 1,
+                    borderRadius: 8
+                }]
+            },
+            options: chartOptions
+        });
+
+        // Shared Balloon Background Logic
+        const canvas = document.getElementById('balloon-canvas');
+        const ctx = canvas.getContext('2d');
+        let balloons = [];
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Balloon {
+            constructor() {
+                this.radius = 25;
+                this.x = Math.random() * (canvas.width - 50) + 25;
+                this.y = Math.random() * (canvas.height - 50) + 25;
+                this.dx = (Math.random() - 0.5) * 1.5;
+                this.dy = (Math.random() - 0.5) * 1.5;
+                this.color = `hsla(${Math.random() * 360}, 60%, 50%, 0.2)`;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(this.x - 8, this.y - 8, 6, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255,255,255,0.05)';
+                ctx.fill();
+            }
+            update(others) {
+                if (this.x + this.radius > canvas.width || this.x - this.radius < 0) this.dx *= -1;
+                if (this.y + this.radius > canvas.height || this.y - this.radius < 0) this.dy *= -1;
+
+                others.forEach(o => {
+                    if (o === this) return;
+                    const dist = Math.hypot(o.x - this.x, o.y - this.y);
+                    if (dist < this.radius + o.radius) {
+                        [this.dx, o.dx] = [o.dx, this.dx];
+                        [this.dy, o.dy] = [o.dy, this.dy];
+                    }
+                });
+
+                this.x += this.dx;
+                this.y += this.dy;
+                this.draw();
+            }
+        }
+
+        for (let i = 0; i < 40; i++) balloons.push(new Balloon());
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            balloons.forEach(b => b.update(balloons));
+            requestAnimationFrame(animate);
+        }
+        animate();
+    </script>
+</body>
+</html>

@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Network | EarnPoint</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-[#020617] font-sans text-slate-300">
+
+    <!-- Animated Balloon Background -->
+    <canvas id="balloon-canvas" class="fixed inset-0 z-[-1] pointer-events-none"></canvas>
+
+    <!-- Mobile Sidebar Toggle Button -->
+    <button id="mobile-toggle" class="fixed top-6 left-6 z-[60] w-12 h-12 flex items-center justify-center bg-slate-900/90 border border-white/10 rounded-2xl text-blue-500 shadow-2xl active:scale-90 transition-all backdrop-blur-md">
+        <svg id="menu-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 7h16M4 12h10M4 17h16"></path>
+        </svg>
+        <svg id="close-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+    </button>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden md:hidden transition-opacity duration-300"></div>
+
+    <div class="flex min-h-screen relative">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-slate-950/50 backdrop-blur-xl border-r border-white/10 text-slate-400 fixed md:sticky inset-y-0 left-0 z-50 transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col flex-shrink-0">
+            <div class="p-6">
+                <span class="text-2xl font-bold text-white">Earn<span class="text-blue-500">Point</span></span>
+            </div>
+            <nav class="flex-1 px-4 space-y-1 mt-4">
+                <a href="dashboard.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-chart-pie w-5"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="spin.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-dharmachakra w-5"></i>
+                    <span>Lucky Spin</span>
+                </a>
+                <a href="youtubevideos.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fab fa-youtube w-5"></i>
+                    <span>YouTube Rewards</span>
+                </a>
+                <a href="tiktok_videos.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fab fa-tiktok w-5"></i>
+                    <span>TikTok Rewards</span>
+                </a>
+                <a href="surveys.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-poll-h w-5"></i>
+                    <span>Surveys</span>
+                </a>
+                <a href="refferals.html" class="flex items-center space-x-3 bg-blue-600 text-white p-3 rounded-xl transition">
+                    <i class="fas fa-users w-5"></i>
+                    <span>Referrals</span>
+                </a>
+                <a href="wallet.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-wallet w-5"></i>
+                    <span>Withdraw</span>
+                </a>
+                <a href="membership.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-crown w-5"></i>
+                    <span>Membership</span>
+                </a>
+                <a href="settings.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-cog w-5"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-4 sm:p-6 md:p-10">
+        <!-- Header -->
+        <header class="mb-10">
+            <h1 class="text-2xl sm:text-3xl font-bold text-white">Referral Network</h1>
+            <p class="text-slate-500 text-xs sm:text-sm">Grow your community and earn passive commissions across 3 levels.</p>
+        </header>
+
+        <!-- Referral Link Card -->
+        <div class="bg-blue-600 rounded-[1.5rem] sm:rounded-[2rem] p-4 sm:p-6 md:p-8 mb-10 text-white shadow-2xl shadow-blue-900/20 relative overflow-hidden">
+            <div class="relative z-10">
+                <h2 class="text-lg sm:text-xl font-bold mb-2">Your Invitation Link</h2>
+                <p class="text-blue-100 mb-6 text-xs sm:text-sm">Share this link to start building your Level 1 network.</p>
+                
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="flex-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl sm:rounded-2xl p-3 sm:p-4 flex items-center justify-between min-w-0 cursor-pointer group" id="copy-link-container">
+                        <code id="referral-url" class="text-blue-50 font-mono text-[10px] sm:text-sm overflow-hidden text-ellipsis whitespace-nowrap">Loading referral link...</code>
+                        <button class="ml-2 sm:ml-4 text-white group-hover:text-blue-400 transition flex-shrink-0">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <button id="share-link-btn" class="bg-white text-blue-600 px-4 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl text-sm sm:text-base font-bold hover:bg-blue-50 transition">
+                        Share on Social Media
+                    </button>
+                </div>
+            </div>
+            <!-- Decorative Icon -->
+            <i class="fas fa-users absolute -right-10 -bottom-10 text-9xl text-white/10 rotate-12"></i>
+        </div>
+
+        <!-- 3-Tier Statistics -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+            <!-- Tier 1 -->
+            <div class="bg-white/5 backdrop-blur-md p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-white/10 transition hover:bg-white/10">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="bg-blue-500/10 text-blue-400 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">Level 1 (Direct)</span>
+                    <i class="fas fa-user-friends text-slate-300"></i>
+                </div>
+                <div class="space-y-1">
+                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Active Recruits</p>
+                    <p id="l1-count" class="text-xl sm:text-2xl font-bold text-white">0 Users</p>
+                </div>
+                <div class="mt-4 pt-4 border-t border-white/10">
+                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Earned Commission (10%)</p>
+                    <p id="l1-earned" class="text-lg sm:text-xl font-bold text-green-400">Ksh 0.00</p>
+                </div>
+            </div>
+
+            <!-- Tier 2 -->
+            <div class="bg-white/5 backdrop-blur-md p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-white/10 transition hover:bg-white/10">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">Level 2 (Extended)</span>
+                    <i class="fas fa-network-wired text-slate-300"></i>
+                </div>
+                <div class="space-y-1">
+                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Active Recruits</p>
+                    <p id="l2-count" class="text-xl sm:text-2xl font-bold text-white">0 Users</p>
+                </div>
+                <div class="mt-4 pt-4 border-t border-white/10">
+                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Earned Commission (5%)</p>
+                    <p id="l2-earned" class="text-lg sm:text-xl font-bold text-green-400">Ksh 0.00</p>
+                </div>
+            </div>
+
+            <!-- Tier 3 -->
+            <div class="bg-white/5 backdrop-blur-md p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-white/10 transition hover:bg-white/10">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="bg-purple-500/10 text-purple-400 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">Level 3 (Passive)</span>
+                    <i class="fas fa-sitemap text-slate-300"></i>
+                </div>
+                <div class="space-y-1">
+                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Active Recruits</p>
+                    <p id="l3-count" class="text-xl sm:text-2xl font-bold text-white">0 Users</p>
+                </div>
+                <div class="mt-4 pt-4 border-t border-white/10">
+                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Earned Commission (2%)</p>
+                    <p id="l3-earned" class="text-lg sm:text-xl font-bold text-green-400">Ksh 0.00</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Recruits List -->
+        <div class="bg-white/5 backdrop-blur-md rounded-2xl sm:rounded-3xl border border-white/10 overflow-hidden">
+            <div class="p-4 sm:p-6 border-b border-white/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <h3 class="font-bold text-white text-sm sm:text-base">Recent Network Activity</h3>
+                <div class="flex flex-wrap gap-2">
+                    <button class="px-3 py-1 bg-blue-600 rounded-lg text-xs font-bold text-white">Tier 1</button>
+                    <button class="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-xs font-bold text-slate-400 hover:bg-white/10 transition">Tier 2</button>
+                    <button class="px-3 py-1 bg-white/5 border border-white/10 rounded-lg text-xs font-bold text-slate-400 hover:bg-white/10 transition">Tier 3</button>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-white/5 text-slate-400 text-[10px] uppercase font-bold tracking-widest">
+                        <tr class="text-[9px] sm:text-[10px]">
+                            <th class="px-2 sm:px-6 py-4">User</th>
+                            <th class="px-2 sm:px-6 py-4">Level</th>
+                            <th class="px-2 sm:px-6 py-4">Status</th>
+                            <th class="px-2 sm:px-6 py-4">Joined</th>
+                            <th class="px-2 sm:px-6 py-4 text-right">Comm.</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recruits-table-body" class="divide-y divide-white/5 text-[10px] sm:text-sm">
+                        <tr>
+                            <td colspan="5" class="px-6 py-10 text-center text-slate-500 italic">Fetching network data...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        </main>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('token');
+        if (!token) window.location.href = 'login.html';
+
+        // Load Live Data
+        document.addEventListener('DOMContentLoaded', async () => {
+            fetchProfile();
+            fetchReferralStats();
+        });
+
+        async function fetchProfile() {
+            try {
+                const res = await fetch('/api/users/profile', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const user = await res.json();
+                
+                // Set Referral Link
+                const baseUrl = window.location.origin;
+                // Assuming the backend provides a 'referral_code' or we use user ID
+                const refCode = user.referral_code || user.id || 'USER'; 
+                const refUrl = `${baseUrl}/registration.html?ref=${refCode}`;
+                
+                document.getElementById('referral-url').innerText = refUrl;
+                
+                // Setup Copy Functionality
+                document.getElementById('copy-link-container').onclick = () => {
+                    navigator.clipboard.writeText(refUrl);
+                    alert('Referral link copied!');
+                };
+
+                // Setup Share Functionality
+                document.getElementById('share-link-btn').onclick = () => {
+                    if (navigator.share) {
+                        navigator.share({
+                            title: 'Join EarnPoint',
+                            text: 'Start earning today with EarnPoint!',
+                            url: refUrl
+                        });
+                    } else {
+                        window.open(`https://wa.me/?text=Join me on EarnPoint! ${refUrl}`, '_blank');
+                    }
+                };
+            } catch (err) {
+                console.error("Profile load error", err);
+            }
+        }
+
+        async function fetchReferralStats() {
+            try {
+                const res = await fetch('/api/users/referrals', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+
+                // Update Stats
+                updateCount('l1-count', data.summary.l1_count, 'Users');
+                updateCount('l1-earned', data.summary.l1_earned, 'Ksh', true);
+                
+                updateCount('l2-count', data.summary.l2_count, 'Users');
+                updateCount('l2-earned', data.summary.l2_earned, 'Ksh', true);
+                
+                updateCount('l3-count', data.summary.l3_count, 'Users');
+                updateCount('l3-earned', data.summary.l3_earned, 'Ksh', true);
+
+                // Update Table
+                renderTable(data.recent_activity);
+            } catch (err) {
+                console.error("Referral stats error", err);
+                document.getElementById('recruits-table-body').innerHTML = `
+                    <tr><td colspan="5" class="px-6 py-10 text-center text-red-500">Failed to load network data.</td></tr>
+                `;
+            }
+        }
+
+        function updateCount(id, val, suffix, isCurrency = false) {
+            const el = document.getElementById(id);
+            const value = parseFloat(val || 0);
+            el.innerText = isCurrency ? `Ksh ${value.toFixed(2)}` : `${value} ${suffix}`;
+        }
+
+        function renderTable(activities) {
+            const tbody = document.getElementById('recruits-table-body');
+            if (!activities || activities.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-10 text-center text-slate-500 italic">No network activity yet. Start sharing your link!</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = activities.map(act => `
+                <tr class="hover:bg-white/5 transition-colors">
+                    <td class="px-2 sm:px-6 py-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-[10px] sm:text-xs font-bold text-blue-400 flex-shrink-0">
+                                ${getInitials(act.full_name)}
+                            </div>
+                            <span class="font-medium text-white truncate max-w-[80px] sm:max-w-none">${act.full_name}</span>
+                        </div>
+                    </td>
+                    <td class="px-2 sm:px-6 py-4 text-slate-500">${act.level}</td>
+                    <td class="px-2 sm:px-6 py-4">
+                        <span class="${act.status === 'Active' ? 'bg-green-400/10 text-green-400' : 'bg-amber-400/10 text-amber-400'} px-1 sm:px-2 py-0.5 rounded text-[8px] sm:text-[10px] font-bold uppercase tracking-wider">
+                            ${act.status}
+                        </span>
+                    </td>
+                    <td class="px-2 sm:px-6 py-4 text-slate-500">${formatDate(act.created_at)}</td>
+                    <td class="px-2 sm:px-6 py-4 text-right font-bold text-white">+Ksh ${parseFloat(act.commission).toFixed(2)}</td>
+                </tr>
+            `).join('');
+        }
+
+        function getInitials(name) {
+            return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            const now = new Date();
+            const diff = Math.floor((now - date) / 1000 / 60); // minutes
+            if (diff < 60) return `${diff}m ago`;
+            if (diff < 1440) return `${Math.floor(diff/60)}h ago`;
+            return date.toLocaleDateString();
+        }
+
+        // Mobile Sidebar Functionality
+        const sidebar = document.getElementById('sidebar');
+        const mobileToggle = document.getElementById('mobile-toggle');
+        const overlay = document.getElementById('sidebar-overlay');
+        const menuIcon = document.getElementById('menu-icon');
+        const closeIcon = document.getElementById('close-icon');
+
+        function toggleSidebar() {
+            const isHidden = sidebar.classList.contains('-translate-x-full');
+            
+            if (isHidden) {
+                // Open Sidebar
+                sidebar.classList.remove('-translate-x-full');
+                sidebar.classList.add('translate-x-0');
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.style.opacity = '1', 10);
+                // Toggle Icons
+                menuIcon.classList.add('hidden');
+                closeIcon.classList.remove('hidden');
+            } else {
+                // Close Sidebar
+                sidebar.classList.add('-translate-x-full');
+                sidebar.classList.remove('translate-x-0');
+                overlay.classList.add('hidden');
+                overlay.style.opacity = '0';
+                // Toggle Icons
+                menuIcon.classList.remove('hidden');
+                closeIcon.classList.add('hidden');
+            }
+        }
+
+        // Ensure sidebar starts open on Desktop and icons are correct
+        if (window.innerWidth >= 768) {
+            sidebar.classList.remove('-translate-x-full');
+            sidebar.classList.add('translate-x-0');
+            menuIcon.classList.add('hidden');
+            closeIcon.classList.remove('hidden');
+        }
+
+        mobileToggle.addEventListener('click', toggleSidebar);
+        overlay.addEventListener('click', toggleSidebar);
+
+        // Balloon Background Logic
+        const canvas = document.getElementById('balloon-canvas');
+        const ctx = canvas.getContext('2d');
+        let balloons = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Balloon {
+            constructor() {
+                this.radius = 25; // 50px diameter
+                this.x = Math.random() * (canvas.width - this.radius * 2) + this.radius;
+                this.y = Math.random() * (canvas.height - this.radius * 2) + this.radius;
+                this.dx = (Math.random() - 0.5) * 2; // Random velocity X
+                this.dy = (Math.random() - 0.5) * 2; // Random velocity Y
+                this.color = `hsla(${Math.random() * 360}, 70%, 60%, 0.3)`;
+            }
+
+            draw() {
+                ctx.beginPath();
+                // Draw the balloon body
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                
+                // Draw the highlight/shine for a 3D effect
+                ctx.beginPath();
+                ctx.arc(this.x - this.radius/3, this.y - this.radius/3, this.radius/4, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+                ctx.fill();
+
+                // Draw the small triangle at the bottom
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y + this.radius);
+                ctx.lineTo(this.x - 5, this.y + this.radius + 10);
+                ctx.lineTo(this.x + 5, this.y + this.radius + 10);
+                ctx.closePath();
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+
+            update(others) {
+                // Collision detection with edges
+                if (this.x + this.radius > canvas.width || this.x - this.radius < 0) {
+                    this.dx = -this.dx;
+                }
+                if (this.y + this.radius > canvas.height || this.y - this.radius < 0) {
+                    this.dy = -this.dy;
+                }
+
+                // Collision detection with other balloons
+                for (let other of others) {
+                    if (this === other) continue;
+                    const dx = other.x - this.x;
+                    const dy = other.y - this.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < this.radius + other.radius) {
+                        // Simple elastic collision (velocity swap)
+                        const tempDx = this.dx;
+                        const tempDy = this.dy;
+                        this.dx = other.dx;
+                        this.dy = other.dy;
+                        other.dx = tempDx;
+                        other.dy = tempDy;
+
+                        // Prevent balloons from sticking together by resolving overlap
+                        const overlap = (this.radius + other.radius - distance) / 2;
+                        this.x -= (dx / distance) * overlap;
+                        this.y -= (dy / distance) * overlap;
+                    }
+                }
+
+                this.x += this.dx;
+                this.y += this.dy;
+
+                this.draw();
+            }
+        }
+
+        function initBalloons() {
+            balloons = [];
+            for (let i = 0; i < 50; i++) {
+                balloons.push(new Balloon());
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            balloons.forEach(balloon => balloon.update(balloons));
+            requestAnimationFrame(animate);
+        }
+
+        initBalloons();
+        animate();
+    </script>
+</body>
+</html>

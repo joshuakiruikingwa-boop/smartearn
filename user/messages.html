@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages | FreelanceFlow</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-[#020617] h-screen overflow-hidden text-slate-300">
+
+    <!-- Mobile Sidebar Toggle Button -->
+    <button id="mobile-toggle" class="md:hidden fixed top-6 left-6 z-[60] w-12 h-12 flex items-center justify-center bg-slate-900/90 border border-white/10 rounded-2xl text-blue-500 shadow-2xl active:scale-90 transition-all backdrop-blur-md">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 7h16M4 12h10M4 17h16"></path>
+        </svg>
+    </button>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden md:hidden transition-opacity duration-300"></div>
+
+    <div class="flex h-full relative">
+        <!-- Main Portal Sidebar -->
+        <aside id="sidebar" class="w-64 bg-slate-950/50 backdrop-blur-xl border-r border-white/10 text-slate-400 fixed md:sticky inset-y-0 left-0 z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col flex-shrink-0">
+            <div class="p-6">
+                <span class="text-2xl font-bold text-white">Earn<span class="text-blue-500">Point</span></span>
+            </div>
+            <nav class="flex-1 px-4 space-y-1 mt-4">
+                <a href="dashboard.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-chart-pie w-5"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="spin.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-dharmachakra w-5"></i>
+                    <span>Lucky Spin</span>
+                </a>
+                <a href="youtubevideos.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fab fa-youtube w-5"></i>
+                    <span>YouTube Rewards</span>
+                </a>
+                <a href="surveys.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-poll-h w-5"></i>
+                    <span>Surveys</span>
+                </a>
+                <a href="refferals.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-users w-5"></i>
+                    <span>Referrals</span>
+                </a>
+                <a href="wallet.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-wallet w-5"></i>
+                    <span>Withdraw</span>
+                </a>
+                <a href="settings.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-cog w-5"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Messaging Interface -->
+        <main class="flex flex-grow overflow-hidden">
+        
+        <!-- Inbox Sidebar -->
+        <aside class="w-full md:w-80 lg:w-96 bg-slate-950/30 backdrop-blur-md border-r border-white/10 flex flex-col">
+            <div class="p-4 border-b border-white/5">
+                <div class="relative">
+                    <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-slate-400"></i>
+                    <input type="text" placeholder="Search conversations..." class="w-full pl-10 pr-4 py-2 bg-white/5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 border border-white/5 text-white placeholder-slate-600">
+                </div>
+            </div>
+            
+            <div class="flex-grow overflow-y-auto">
+                <!-- Active Conversation Item -->
+                <div class="p-4 bg-blue-600/10 border-l-4 border-blue-600 flex gap-3 cursor-pointer">
+                    <div class="w-12 h-12 bg-white/10 rounded-full flex-shrink-0 relative">
+                        <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-[#020617] rounded-full"></span>
+                    </div>
+                    <div class="flex-grow min-w-0">
+                        <div class="flex justify-between items-baseline">
+                            <h4 class="font-bold text-sm truncate text-white">Sarah Jenkins</h4>
+                            <span class="text-[10px] font-medium text-slate-400">12:45 PM</span>
+                        </div>
+                        <p class="text-xs text-blue-600 font-medium truncate">SaaS Landing Page Design</p>
+                        <p class="text-xs text-slate-500 truncate">I've uploaded the new assets...</p>
+                    </div>
+                </div>
+
+                <!-- Standard Conversation Item -->
+                <div class="p-4 hover:bg-white/5 border-l-4 border-transparent flex gap-3 cursor-pointer transition">
+                    <div class="w-12 h-12 bg-white/5 rounded-full flex-shrink-0"></div>
+                    <div class="flex-grow min-w-0">
+                        <div class="flex justify-between items-baseline">
+                            <h4 class="font-bold text-sm truncate text-white">Mike Ross</h4>
+                            <span class="text-[10px] font-medium text-slate-400">Yesterday</span>
+                        </div>
+                        <p class="text-xs text-slate-500 font-medium truncate">API Integration</p>
+                        <p class="text-xs text-slate-400 truncate">The payment was released. Thanks!</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Active Chat Area -->
+        <section class="hidden md:flex flex-col flex-grow bg-slate-950/20 backdrop-blur-sm">
+            <!-- Chat Header -->
+            <div class="p-4 border-b border-white/10 flex justify-between items-center bg-slate-950/40">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white/10 rounded-full"></div>
+                    <div>
+                        <h3 class="font-bold text-sm text-white">Sarah Jenkins</h3>
+                        <p class="text-[11px] text-green-400 font-bold uppercase">Online Now</p>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button class="p-2 text-slate-500 hover:text-white transition">
+                        <i data-lucide="paperclip" class="w-5 h-5"></i>
+                    </button>
+                    <button class="p-2 text-slate-500 hover:text-white transition">
+                        <i data-lucide="more-vertical" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Messages List -->
+            <div class="flex-grow p-6 overflow-y-auto space-y-6">
+                <!-- Received Message -->
+                <div class="flex gap-3 max-w-lg">
+                    <div class="w-8 h-8 bg-white/10 rounded-full flex-shrink-0 mt-auto"></div>
+                    <div class="bg-white/5 p-4 rounded-3xl rounded-bl-none border border-white/10 backdrop-blur-md">
+                        <p class="text-sm text-slate-300 leading-relaxed">I've uploaded the new assets to the project folder. Can you let me know if the color palette works?</p>
+                        <span class="text-[10px] text-slate-400 mt-2 block">12:43 PM</span>
+                    </div>
+                </div>
+
+                <!-- Sent Message -->
+                <div class="flex gap-3 max-w-lg ml-auto flex-row-reverse">
+                    <div class="w-8 h-8 bg-blue-600 rounded-full flex-shrink-0 mt-auto"></div>
+                    <div class="bg-blue-600 p-4 rounded-3xl rounded-br-none shadow-xl shadow-blue-900/20">
+                        <p class="text-sm text-white">Checking them now! I'll get back to you within the hour.</p>
+                        <span class="text-[10px] text-blue-100/60 mt-2 block text-right">12:45 PM</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Message Input (TSD Real-time Component) -->
+            <div class="p-6 border-t border-white/10 bg-slate-950/40">
+                <form class="flex gap-3">
+                    <input type="text" placeholder="Write your message..." class="flex-grow px-6 py-4 bg-white/5 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 transition border border-white/5 text-white">
+                    <button type="submit" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold hover:bg-blue-700 transition flex items-center gap-2 shadow-xl shadow-blue-900/20">
+                        <span>Send</span>
+                        <i data-lucide="send" class="w-4 h-4"></i>
+                    </button>
+                </form>
+            </div>
+        </section>
+
+    </main>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Mobile Sidebar Functionality
+        const sidebar = document.getElementById('sidebar');
+        const mobileToggle = document.getElementById('mobile-toggle');
+        const overlay = document.getElementById('sidebar-overlay');
+
+        function toggleSidebar() {
+            const isOpen = sidebar.classList.contains('translate-x-0');
+            if (isOpen) {
+                sidebar.classList.replace('translate-x-0', '-translate-x-full');
+                overlay.classList.add('hidden');
+                overlay.style.opacity = '0';
+            } else {
+                sidebar.classList.replace('-translate-x-full', 'translate-x-0');
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.style.opacity = '1', 10);
+            }
+        }
+
+        mobileToggle.addEventListener('click', toggleSidebar);
+        overlay.addEventListener('click', toggleSidebar);
+    </script>
+</body>
+</html>

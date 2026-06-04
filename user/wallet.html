@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallet & Payouts | EarnPoint</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-[#020617] font-sans text-slate-300">
+
+    <!-- Animated Balloon Background -->
+    <canvas id="balloon-canvas" class="fixed inset-0 z-[-1] pointer-events-none"></canvas>
+
+    <!-- Mobile Sidebar Toggle Button -->
+    <button id="mobile-toggle" class="md:hidden fixed top-6 left-6 z-[60] w-12 h-12 flex items-center justify-center bg-slate-900/90 border border-white/10 rounded-2xl text-blue-500 shadow-2xl active:scale-90 transition-all backdrop-blur-md">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 7h16M4 12h10M4 17h16"></path>
+        </svg>
+    </button>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden md:hidden transition-opacity duration-300"></div>
+
+    <div class="flex min-h-screen relative">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-slate-950/50 backdrop-blur-xl border-r border-white/10 text-slate-400 fixed md:sticky inset-y-0 left-0 z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col flex-shrink-0">
+            <div class="p-6">
+                <span class="text-2xl font-bold text-white">Earn<span class="text-blue-500">Point</span></span>
+            </div>
+            <nav class="flex-1 px-4 space-y-1 mt-4">
+                <a href="dashboard.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-chart-pie w-5"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="spin.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-dharmachakra w-5"></i>
+                    <span>Lucky Spin</span>
+                </a>
+                <a href="youtubevideos.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fab fa-youtube w-5"></i>
+                    <span>YouTube Rewards</span>
+                </a>
+                <a href="tiktok_videos.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fab fa-tiktok w-5"></i>
+                    <span>TikTok Rewards</span>
+                </a>
+                <a href="surveys.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-poll-h w-5"></i>
+                    <span>Surveys</span>
+                </a>
+                <a href="refferals.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-users w-5"></i>
+                    <span>Referrals</span>
+                </a>
+                <a href="wallet.html" class="flex items-center space-x-3 bg-blue-600 text-white p-3 rounded-xl transition">
+                    <i class="fas fa-wallet w-5"></i>
+                    <span>Withdraw</span>
+                </a>
+                <a href="membership.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-crown w-5"></i>
+                    <span>Membership</span>
+                </a>
+                <a href="settings.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-cog w-5"></i>
+                    <span>Settings</span>
+                </a>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6 md:p-10">
+        <header class="mb-10 flex justify-between items-end">
+            <div>
+                <h1 class="text-3xl font-bold text-white">My Wallet</h1>
+                <p class="text-slate-500">Manage your earnings and linked payment accounts.</p>
+            </div>
+            <div class="text-right hidden md:block">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Next Payout Cycle</span>
+                <p class="font-bold text-white">Every Monday / Thursday</p>
+            </div>
+        </header>
+
+        <div class="grid lg:grid-cols-3 gap-8">
+            
+            <!-- LEFT COLUMN: BALANCE & WITHDRAW FORM -->
+            <div class="lg:col-span-2 space-y-6">
+                
+                <!-- Balance Card -->
+                <div class="bg-white/5 backdrop-blur-md rounded-[2rem] p-8 text-white relative overflow-hidden border border-white/10 shadow-2xl">
+                    <div class="relative z-10 flex justify-between items-center">
+                        <div>
+                            <p class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-2">Available for Withdrawal</p>
+                            <h2 id="balance-amount" class="text-5xl font-extrabold">Ksh 0.00</h2>
+                        </div>
+                        <div class="text-right">
+                            <div class="bg-white/5 backdrop-blur-md rounded-2xl p-3 inline-block border border-white/10">
+                                <p class="text-[10px] uppercase font-bold text-slate-400">Min. Threshold</p>
+                                <p class="text-lg font-bold">Ksh 50.00</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Progress Bar to next payout -->
+                    <div class="mt-10 relative h-2 bg-white/10 rounded-full overflow-hidden">
+                        <div id="balance-progress" class="absolute top-0 left-0 h-full bg-blue-500 transition-all duration-1000" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Payout Method Selection -->
+                <div class="bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 p-8">
+                    <h3 class="text-lg font-bold mb-6 text-white">Request Payout</h3>
+                    
+                    <form id="withdraw-form" class="space-y-6">
+                        <!-- Method Toggle -->
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <label class="method-card cursor-pointer border-2 border-blue-600 bg-blue-600/10 p-4 rounded-2xl flex flex-col items-center justify-center transition shadow-xl shadow-blue-900/20" data-method="MPESA">
+                                <input type="radio" name="payout_method" value="MPESA" class="hidden" checked>
+                                <i class="fas fa-mobile-alt text-green-500 text-3xl mb-2"></i>
+                                <span class="text-sm font-bold text-white">M-Pesa</span>
+                            </label>
+                            <label class="method-card cursor-pointer border border-white/10 bg-white/5 p-4 rounded-2xl flex flex-col items-center justify-center hover:bg-white/10 transition" data-method="PAYPAL">
+                                <input type="radio" name="payout_method" value="PAYPAL" class="hidden">
+                                <i class="fab fa-paypal text-blue-600 text-3xl mb-2"></i>
+                                <span class="text-sm font-bold text-white">PayPal</span>
+                            </label>
+                            <label class="method-card cursor-pointer border border-white/10 bg-white/5 p-4 rounded-2xl flex flex-col items-center justify-center hover:bg-white/10 transition" data-method="BANK">
+                                <input type="radio" name="payout_method" value="BANK" class="hidden">
+                                <i class="fas fa-university text-slate-400 text-3xl mb-2"></i>
+                                <span class="text-sm font-bold text-white">Bank</span>
+                            </label>
+                            <label class="method-card cursor-pointer border border-white/10 bg-white/5 p-4 rounded-2xl flex flex-col items-center justify-center hover:bg-white/10 transition" data-method="USDT">
+                                <input type="radio" name="payout_method" value="USDT" class="hidden">
+                                <i class="fab fa-bitcoin text-amber-500 text-3xl mb-2"></i>
+                                <span class="text-sm font-bold text-white">USDT</span>
+                            </label>
+                        </div>
+
+                        <div id="method-details-container">
+                            <label class="block text-sm font-bold text-slate-400 mb-2 uppercase tracking-widest">M-Pesa Phone Number</label>
+                            <input type="tel" id="payout-identifier" value="+254" placeholder="+2547xxxxxxxx" class="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-6 font-bold focus:ring-2 focus:ring-blue-600 outline-none text-white placeholder-slate-600">
+                            <p id="network-indicator" class="mt-2 text-[10px] font-bold uppercase tracking-wider hidden"></p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold text-slate-400 mb-2 uppercase tracking-widest">Amount to Withdraw</label>
+                            <div class="relative">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-500">KSH</span>
+                                <input type="number" id="withdraw-amount" placeholder="0.00" class="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 font-bold focus:ring-2 focus:ring-blue-600 outline-none text-white placeholder-slate-600">
+                            </div>
+                            <p class="mt-2 text-[10px] text-slate-400 uppercase font-bold tracking-wider">Processing fee: 1.5% (Internal Transfer Fee)</p>
+                        </div>
+
+                        <button type="submit" id="submit-btn" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold shadow-xl shadow-blue-900/20 hover:bg-blue-700 transition">
+                            Submit Withdrawal Request
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: RECENT HISTORY -->
+            <div class="space-y-6">
+                <div class="bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 overflow-hidden">
+                    <div class="p-6 border-b border-white/5 flex justify-between items-center">
+                        <h3 class="font-bold text-white">Payout History</h3>
+                        <i class="fas fa-history text-slate-300"></i>
+                    </div>
+                    <div id="history-list" class="divide-y divide-white/5 max-h-[400px] overflow-y-auto">
+                        <p class="p-6 text-sm text-slate-500 italic">No transactions found.</p>
+                    </div>
+                    <div class="p-4 bg-white/5 text-center border-t border-white/5">
+                        <button class="w-full bg-white/5 border border-white/10 text-blue-400 py-3 rounded-xl font-bold text-sm hover:bg-white/10 transition">View All Transactions</button>
+                    </div>
+                </div>
+
+                <!-- Security Box -->
+                <div class="bg-blue-600/10 rounded-3xl p-6 border border-blue-500/20">
+                    <h4 class="text-blue-400 font-bold text-sm mb-2 flex items-center uppercase tracking-widest">
+                        <i class="fas fa-shield-alt mr-2"></i> Security First
+                    </h4>
+                    <p class="text-slate-500 text-xs leading-relaxed">
+                        To protect your account, withdrawals are subject to a 24-hour verification period. Please ensure your payment details are correct.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+        </main>
+    </div>
+
+    <script>
+        // Auth & Payout Logic
+        const API_BASE = '/api'; // Maps to your localhost:5000/api
+        const token = localStorage.getItem('token');
+
+        // Fetch User Balance and History on Load
+        document.addEventListener('DOMContentLoaded', async () => {
+            fetchUserData();
+            // setupMethodSelection();
+        });
+
+        async function fetchUserData() {
+            try {
+                // This is a placeholder for your actual User Endpoint
+                const response = await fetch(`${API_BASE}/users/profile`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                
+                if (data.balance !== undefined) {
+                    const balance = parseFloat(data.balance);
+                    document.getElementById('balance-amount').innerText = `Ksh ${balance.toFixed(2)}`;
+                    
+                    // Update progress bar (assuming 50 is the goal for withdrawal)
+                    const progress = Math.min((balance / 50) * 100, 100);
+                    document.getElementById('balance-progress').style.width = `${progress}%`;
+                }
+            } catch (err) {
+                console.error("Failed to fetch balance", err);
+            }
+        }
+
+        // Handle Payout Method UI Toggle
+        const methodCards = document.querySelectorAll('.method-card');
+        const detailLabel = document.querySelector('#method-details-container label');
+        const detailInput = document.getElementById('payout-identifier');
+
+        methodCards.forEach(card => {
+            card.addEventListener('click', () => {
+                // Reset UI
+                methodCards.forEach(c => c.classList.remove('border-blue-600', 'bg-blue-600/10'));
+                methodCards.forEach(c => c.classList.add('border-white/10', 'bg-white/5'));
+                
+                // Select this card
+                card.classList.remove('border-white/10', 'bg-white/5');
+                card.classList.add('border-2', 'border-blue-600', 'bg-blue-600/10');
+                
+                const method = card.getAttribute('data-method');
+                updateMethodInput(method);
+            });
+        });
+
+        function updateMethodInput(method) {
+            const networkIndicator = document.getElementById('network-indicator');
+            networkIndicator.classList.add('hidden');
+            detailInput.value = "";
+            switch(method) {
+                case 'MPESA':
+                    detailLabel.innerText = "M-Pesa Phone Number";
+                    detailInput.placeholder = "+2547xxxxxxxx";
+                    detailInput.type = "tel";
+                    detailInput.value = "+254";
+                    break;
+                case 'PAYPAL':
+                    detailLabel.innerText = "PayPal Email Address";
+                    detailInput.placeholder = "email@example.com";
+                    detailInput.type = "email";
+                    break;
+                case 'BANK':
+                    detailLabel.innerText = "Account Details (Bank, Branch, Acc #)";
+                    detailInput.placeholder = "KCB, Sarit Center, 123456789";
+                    detailInput.type = "text";
+                    break;
+                case 'USDT':
+                    detailLabel.innerText = "USDT (TRC20) Wallet Address";
+                    detailInput.placeholder = "Txxxxxxxxxxxxxxxxxxxxxx";
+                    detailInput.type = "text";
+                    break;
+            }
+        }
+
+        // Network Detection Logic
+        function getNetwork(val) {
+            let n = val.replace(/\D/g, ''); // Remove non-digits
+            if (n.startsWith('254')) n = '0' + n.slice(3); // Normalize to 07... or 01...
+            
+            const p3 = n.slice(0, 3);
+            const p4 = n.slice(0, 4);
+
+            if (p4 === '0747') return { name: 'Faiba', color: 'text-cyan-400' };
+            
+            // Equitel
+            if (['0763', '0764', '0765', '0766'].includes(p4)) return { name: 'Equitel', color: 'text-rose-500' };
+            
+            // Safaricom
+            if (['070', '071', '072', '079', '011'].includes(p3) || 
+                ['0740', '0741', '0742', '0743', '0745', '0746', '0748', '0757', '0758', '0759', '0768', '0769'].includes(p4)) {
+                return { name: 'Safaricom', color: 'text-green-500' };
+            }
+            
+            // Airtel
+            if (['073', '078', '010'].includes(p3) || 
+                ['0750', '0751', '0752', '0753', '0754', '0755', '0756'].includes(p4)) {
+                return { name: 'Airtel', color: 'text-red-500' };
+            }
+            
+            // Telkom
+            if (p3 === '077') return { name: 'Telkom', color: 'text-blue-400' };
+            
+            return null;
+        }
+
+        detailInput.addEventListener('input', (e) => {
+            const method = document.querySelector('input[name="payout_method"]:checked').value;
+            const networkIndicator = document.getElementById('network-indicator');
+            
+            if (method === 'MPESA' && e.target.value.length >= 3) {
+                const network = getNetwork(e.target.value);
+                if (network) {
+                    networkIndicator.innerText = `Detected Network: ${network.name}`;
+                    networkIndicator.className = `mt-2 text-[10px] font-bold uppercase tracking-wider block ${network.color}`;
+                } else {
+                    networkIndicator.classList.add('hidden');
+                }
+            } else {
+                networkIndicator.classList.add('hidden');
+            }
+        });
+
+        // Handle Withdrawal Submission
+        document.getElementById('withdraw-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submit-btn');
+            const amount = document.getElementById('withdraw-amount').value;
+            const method = document.querySelector('input[name="payout_method"]:checked').value;
+            const details = document.getElementById('payout-identifier').value;
+
+            if (!amount || amount < 50) {
+                return alert("Minimum withdrawal amount is Ksh 50.00");
+            }
+
+            submitBtn.disabled = true;
+
+            // M-Pesa specific validation: Only allow Safaricom numbers
+            if (method === 'MPESA') {
+                const network = getNetwork(details);
+                if (!network || network.name !== 'Safaricom') {
+                    alert('For M-Pesa withdrawals, please enter a valid Safaricom number.');
+                    submitBtn.disabled = false;
+                    return;
+                }
+            }
+            submitBtn.innerText = "Processing...";
+
+            // Example fetch request to your backend (need to implement this route)
+            alert(`Request Submitted!\nMethod: ${method}\nAmount: Ksh ${amount}\nAccount: ${details}\n\nPlease allow 24-48 hours for verification.`);
+            
+            // Reset Form
+            submitBtn.disabled = false;
+            submitBtn.innerText = "Submit Withdrawal Request";
+            e.target.reset();
+        });
+
+        // Mobile Sidebar Functionality
+        const sidebar = document.getElementById('sidebar');
+        const mobileToggle = document.getElementById('mobile-toggle');
+        const overlay = document.getElementById('sidebar-overlay');
+
+        function toggleSidebar() {
+            const isOpen = sidebar.classList.contains('translate-x-0');
+            if (isOpen) {
+                sidebar.classList.replace('translate-x-0', '-translate-x-full');
+                overlay.classList.add('hidden');
+                overlay.style.opacity = '0';
+            } else {
+                sidebar.classList.replace('-translate-x-full', 'translate-x-0');
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.style.opacity = '1', 10);
+            }
+        }
+
+        mobileToggle.addEventListener('click', toggleSidebar);
+        overlay.addEventListener('click', toggleSidebar);
+
+        // Balloon Background Logic
+        const canvas = document.getElementById('balloon-canvas');
+        const ctx = canvas.getContext('2d');
+        let balloons = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Balloon {
+            constructor() {
+                this.radius = 25; // 50px diameter
+                this.x = Math.random() * (canvas.width - this.radius * 2) + this.radius;
+                this.y = Math.random() * (canvas.height - this.radius * 2) + this.radius;
+                this.dx = (Math.random() - 0.5) * 2; // Random velocity X
+                this.dy = (Math.random() - 0.5) * 2; // Random velocity Y
+                this.color = `hsla(${Math.random() * 360}, 70%, 60%, 0.3)`;
+            }
+
+            draw() {
+                ctx.beginPath();
+                // Draw the balloon body
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                
+                // Draw the highlight/shine for a 3D effect
+                ctx.beginPath();
+                ctx.arc(this.x - this.radius/3, this.y - this.radius/3, this.radius/4, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+                ctx.fill();
+
+                // Draw the small triangle at the bottom
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y + this.radius);
+                ctx.lineTo(this.x - 5, this.y + this.radius + 10);
+                ctx.lineTo(this.x + 5, this.y + this.radius + 10);
+                ctx.closePath();
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+
+            update(others) {
+                // Collision detection with edges
+                if (this.x + this.radius > canvas.width || this.x - this.radius < 0) {
+                    this.dx = -this.dx;
+                }
+                if (this.y + this.radius > canvas.height || this.y - this.radius < 0) {
+                    this.dy = -this.dy;
+                }
+
+                // Collision detection with other balloons
+                for (let other of others) {
+                    if (this === other) continue;
+                    const dx = other.x - this.x;
+                    const dy = other.y - this.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < this.radius + other.radius) {
+                        // Simple elastic collision (velocity swap)
+                        const tempDx = this.dx;
+                        const tempDy = this.dy;
+                        this.dx = other.dx;
+                        this.dy = other.dy;
+                        other.dx = tempDx;
+                        other.dy = tempDy;
+
+                        // Prevent balloons from sticking together by resolving overlap
+                        const overlap = (this.radius + other.radius - distance) / 2;
+                        this.x -= (dx / distance) * overlap;
+                        this.y -= (dy / distance) * overlap;
+                    }
+                }
+
+                this.x += this.dx;
+                this.y += this.dy;
+
+                this.draw();
+            }
+        }
+
+        function initBalloons() {
+            balloons = [];
+            for (let i = 0; i < 50; i++) {
+                balloons.push(new Balloon());
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            balloons.forEach(balloon => balloon.update(balloons));
+            requestAnimationFrame(animate);
+        }
+
+        initBalloons();
+        animate();
+    </script>
+</body>
+</html>

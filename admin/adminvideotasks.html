@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Task Management | SmartEarn Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-[#020617] font-sans text-slate-300">
+    <script>
+        // Client-side authentication check
+        if (!localStorage.getItem('adminToken')) {
+            window.location.href = '/admin/login';
+        }
+    </script>
+
+    <!-- Animated Balloon Background -->
+    <canvas id="balloon-canvas" class="fixed inset-0 z-[-1] pointer-events-none"></canvas>
+
+    <!-- Mobile Sidebar Toggle -->
+    <button id="mobile-toggle" class="md:hidden fixed top-6 left-6 z-[60] w-12 h-12 flex items-center justify-center bg-slate-900/90 border border-white/10 rounded-2xl text-blue-500 shadow-2xl active:scale-90 transition-all backdrop-blur-md">
+        <i class="fas fa-bars text-xl"></i>
+    </button>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden md:hidden transition-opacity duration-300"></div>
+
+    <div class="flex min-h-screen relative">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-slate-950/50 backdrop-blur-xl border-r border-white/10 text-slate-400 fixed md:sticky inset-y-0 left-0 z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col flex-shrink-0">
+            <div class="p-6">
+                <span class="text-2xl font-bold text-white">SmartEarn <span class="text-blue-500">Admin</span></span>
+            </div>
+            <nav class="flex-1 px-4 space-y-1 mt-4">
+                <a href="admindashboard.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-chart-line w-5"></i>
+                    <span>Overview</span>
+                </a>
+                <a href="adminusermanagement.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-users-cog w-5"></i>
+                    <span>User Management</span>
+                </a>
+                <a href="adminpayouts.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-hand-holding-dollar w-5"></i>
+                    <span>Payout Requests</span>
+                </a>
+                <a href="adminsurveys.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-poll-h w-5"></i>
+                    <span>Surveys</span>
+                </a>
+                <a href="adminvideotasks.html" class="flex items-center space-x-3 bg-blue-600 text-white p-3 rounded-xl transition">
+                    <i class="fab fa-youtube w-5"></i>
+                    <span>Video Tasks</span>
+                </a>
+                <a href="adminsettings.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-cogs w-5"></i>
+                    <span>System Settings</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6 md:p-10">
+            <header class="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-white">Video Task Management</h1>
+                    <p class="text-slate-500 text-sm">Upload and manage video rewards for users.</p>
+                </div>
+                <button onclick="openVideoModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl font-bold transition shadow-lg shadow-blue-900/20">
+                    <i class="fas fa-plus mr-2"></i> Add New Video
+                </button>
+            </header>
+
+            <!-- Summary Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                <div class="bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/10">
+                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Active Videos</p>
+                    <h2 class="text-3xl font-extrabold text-white" id="active-video-total">0</h2>
+                    <p class="text-blue-400 text-[10px] mt-2 font-bold">Currently earning</p>
+                </div>
+                <div class="bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/10">
+                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">YouTube Videos</p>
+                    <h2 class="text-3xl font-extrabold text-red-500" id="youtube-count">0</h2>
+                    <p class="text-slate-500 text-[10px] mt-2 font-bold">Active</p>
+                </div>
+                <div class="bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/10">
+                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">TikTok Videos</p>
+                    <h2 class="text-3xl font-extrabold text-white" id="tiktok-count">0</h2>
+                    <p class="text-slate-500 text-[10px] mt-2 font-bold">Active</p>
+                </div>
+                <div class="bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/10">
+                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Total Views (24h)</p>
+                    <h2 class="text-3xl font-extrabold text-emerald-400" id="total-views-24h">3,450</h2>
+                    <p class="text-slate-500 text-[10px] mt-2 font-bold" id="total-views-24h-sub">+8% from yesterday</p>
+                </div>
+                <div class="bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/10">
+                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Video Payouts</p>
+                    <h2 class="text-3xl font-extrabold text-white" id="video-payouts-month">Ksh 8,240</h2>
+                    <p class="text-slate-500 text-[10px] mt-2 font-bold" id="video-payouts-month-sub">This Month</p>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="flex flex-col md:flex-row gap-4 mb-8">
+                <div class="relative flex-1">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                    <input type="text" id="video-search" placeholder="Search by title or ID..." class="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-blue-600 transition text-white">
+                </div>
+                <select id="platform-filter" class="bg-white/5 border border-white/10 rounded-2xl px-6 py-3 text-white outline-none focus:ring-2 focus:ring-blue-600">
+                    <option value="all">All Platforms</option>
+                    <option value="youtube">YouTube</option>
+                    <option value="tiktok">TikTok</option>
+                </select>
+                <p class="text-slate-500 text-[10px] mt-2 font-bold self-center">Filter active tasks</p>
+            </div>
+
+            <!-- Video Tasks Table -->
+            <div class="bg-white/5 backdrop-blur-md rounded-[2.5rem] border border-white/10 overflow-hidden shadow-2xl">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-white/5 text-[10px] uppercase font-bold text-slate-500 tracking-widest">
+                            <tr>
+                                <th class="px-8 py-5">Video Title</th>
+                                <th class="px-8 py-5">Reward</th>
+                                <th class="px-8 py-5">Platform</th>
+                                <th class="px-8 py-5">Duration</th>
+                                <th class="px-8 py-5">Views</th>
+                                <th class="px-8 py-5">Status</th>
+                                <th class="px-8 py-5 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="video-table-body" class="divide-y divide-white/5">
+                            <!-- Rows will be injected by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Video Modal -->
+    <div id="video-modal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm hidden px-4">
+        <div class="bg-[#0f172a] border border-white/10 p-8 rounded-[2.5rem] shadow-2xl max-w-lg w-full">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-white">Add New Video</h2>
+                <button onclick="closeVideoModal()" class="text-slate-500 hover:text-white transition"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <form id="video-form" class="space-y-6">
+                <div>
+                    <input type="hidden" id="video-id">
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Video Title</label>
+                    <input type="text" id="video-title" required placeholder="e.g., How to Earn Online" class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Platform</label>
+                    <select id="video-platform" class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white">
+                        <option value="youtube">YouTube</option>
+                        <option value="tiktok">TikTok</option>
+                    </select>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-4 mb-2">Video ID / URL (e.g., YouTube ID or TikTok video ID)</label>
+                    <input type="text" id="video-id-input" required placeholder="e.g., dQw4w9WgXcQ (YouTube) or 7012345678901234567 (TikTok)" class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Reward (Ksh)</label>
+                        <input type="number" step="0.01" id="video-reward" required placeholder="2.00" class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Duration (Seconds)</label>
+                        <input type="number" id="video-duration" required placeholder="60" class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Status</label>
+                    <select id="video-status" class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white">
+                        <option value="active">Active</option>
+                        <option value="draft">Draft</option>
+                    </select>
+                </div>
+
+                <div class="flex gap-3 mt-8 pt-6 border-t border-white/10">
+                    <button type="button" onclick="closeVideoModal()" class="flex-1 px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-slate-300 font-bold hover:bg-white/10 transition">Cancel</button>
+                    <button type="submit" class="flex-1 px-6 py-3 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-900/20">Save Video</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:5000';
+
+        let allVideos = []; // Stores all fetched videos
+
+        // Fetch Videos from API
+        async function fetchAndRenderVideos() {
+            try {
+                const token = localStorage.getItem('adminToken');
+                const response = await fetch(`${API_BASE_URL}/admin/videos`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        window.location.href = '/admin/login'; // Redirect to login if unauthorized
+                    }
+                    throw new Error('Failed to fetch videos');
+                }
+                const data = await response.json();
+                allVideos = data.videos; // Store fetched videos
+                renderVideos(allVideos);
+                updateSummaryStats(allVideos);
+            } catch (error) {
+                console.error('Error fetching videos:', error);
+                // Optionally display an error message to the user
+            }
+        }
+
+        function updateSummaryStats(videos) {
+            const youtubeCount = videos.filter(v => v.platform === 'youtube' && v.status === 'active').length;
+            const tiktokCount = videos.filter(v => v.platform === 'tiktok' && v.status === 'active').length;
+
+            // Calculate total views and estimated payouts from the video data
+            const totalViews = videos.reduce((sum, v) => sum + (Number(v.views) || 0), 0);
+            const totalPayouts = videos.reduce((sum, v) => sum + ((Number(v.views) || 0) * parseFloat(v.reward)), 0);
+
+            document.getElementById('youtube-count').textContent = youtubeCount;
+            document.getElementById('tiktok-count').textContent = tiktokCount;
+            document.getElementById('active-video-total').textContent = videos.filter(v => v.status === 'active').length;
+
+            // Update summary cards with live data
+            document.getElementById('total-views-24h').textContent = totalViews.toLocaleString(); // This currently shows cumulative views, not 24h.
+            document.getElementById('total-views-24h-sub').textContent = "Total cumulative views"; // To show 24h views, backend needs to provide this specific metric.
+            
+            document.getElementById('video-payouts-month').textContent = `Ksh ${totalPayouts.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`; // This shows total estimated payouts.
+            document.getElementById('video-payouts-month-sub').textContent = "Total Estimated Payouts"; // To show monthly payouts, backend needs to provide this specific metric.
+        }
+
+        // Render Function
+        function renderVideos(videosToRender) {
+            const tbody = document.getElementById('video-table-body');
+            tbody.innerHTML = '';
+
+            const filterText = document.getElementById('video-search').value.toLowerCase();
+            const filterPlatform = document.getElementById('platform-filter').value;
+
+            const filteredVideos = videosToRender.filter(v => {
+                const matchesSearch = v.title.toLowerCase().includes(filterText) || (v.video_id && v.video_id.toLowerCase().includes(filterText));
+                const matchesPlatform = filterPlatform === 'all' || v.platform === filterPlatform;
+                return matchesSearch && matchesPlatform;
+            });
+
+            if (filteredVideos.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="px-8 py-10 text-center text-slate-500 italic">No video tasks found.</td></tr>`;
+                return;
+            }
+
+            filteredVideos.forEach(v => {
+                const statusColor = v.status === 'active' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-slate-500/10 text-slate-500';
+                const platformIcon = v.platform === 'youtube' ? 'fab fa-youtube text-red-500' : 'fab fa-tiktok text-white';
+                const platformText = v.platform === 'youtube' ? 'YouTube' : 'TikTok';
+                const viewsCount = (Number(v.views) || 0).toLocaleString();
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-white/5 transition group">
+                        <td class="px-8 py-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-12 h-8 rounded bg-slate-800 flex items-center justify-center">
+                                    <i class="${platformIcon}"></i>
+                                </div>
+                                <div>
+                                    <p class="text-white font-bold text-sm">${v.title}</p>
+                                    <p class="text-[10px] text-slate-500 font-mono">ID: ${v.video_id}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-8 py-4"><p class="text-emerald-400 font-extrabold text-sm">Ksh ${parseFloat(v.reward).toFixed(2)}</p></td>
+                        <td class="px-8 py-4"><p class="text-slate-400 text-sm font-medium">${platformText}</p></td>
+                        <td class="px-8 py-4"><p class="text-slate-400 text-sm font-medium">${v.duration_seconds}s</p></td>
+                        <td class="px-8 py-4"><p class="text-white text-sm font-bold">${viewsCount}</p></td>
+                        <td class="px-8 py-4"><span class="${statusColor} px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">${v.status}</span></td>
+                        <td class="px-8 py-4 text-right">
+                            <div class="flex justify-end space-x-2">
+                                <button onclick="openVideoModal('${v.id}')" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-blue-600/20 text-blue-500 transition"><i class="fas fa-edit text-xs"></i></button>
+                                <button onclick="deleteVideo('${v.id}')" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-red-600/20 text-red-500 transition"><i class="fas fa-trash-alt text-xs"></i></button>
+                            </div>
+                        </td>
+                    </tr>`;
+            });
+        }
+
+        // Modal Control
+        const videoModal = document.getElementById('video-modal');
+        const videoForm = document.getElementById('video-form');
+        const videoIdHiddenInput = document.getElementById('video-id');
+        const videoTitleInput = document.getElementById('video-title');
+        const videoPlatformSelect = document.getElementById('video-platform');
+        const videoIdInput = document.getElementById('video-id-input');
+        const videoRewardInput = document.getElementById('video-reward');
+        const videoDurationInput = document.getElementById('video-duration');
+        const videoStatusSelect = document.getElementById('video-status');
+        const saveVideoBtn = document.querySelector('#video-form button[type="submit"]');
+
+        function openVideoModal(videoId = null) {
+            videoForm.reset(); // Clear previous form data
+            videoIdHiddenInput.value = ''; // Clear hidden ID
+            saveVideoBtn.textContent = 'Save Video'; // Default button text
+
+            if (videoId && videoId !== 'null') {
+                const video = allVideos.find(v => v.id == videoId);
+                if (video) {
+                    videoIdHiddenInput.value = video.id;
+                    videoTitleInput.value = video.title;
+                    videoPlatformSelect.value = video.platform;
+                    videoIdInput.value = video.video_id;
+                    videoRewardInput.value = video.reward;
+                    videoDurationInput.value = video.duration_seconds;
+                    videoStatusSelect.value = video.status;
+                    saveVideoBtn.textContent = 'Update Video';
+                }
+            }
+            videoModal.classList.remove('hidden');
+        }
+
+        function closeVideoModal() {
+            videoModal.classList.add('hidden');
+        }
+
+        // Initial Load
+        fetchAndRenderVideos();
+
+        // Handle Form Submission (Create/Update)
+        videoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            let vid = videoIdInput.value.trim();
+            const platform = videoPlatformSelect.value;
+
+            // Auto-extract ID if a full URL is pasted instead of just the ID
+            if (platform === 'youtube') {
+                const ytMatch = vid.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&?/\s]+)/);
+                if (ytMatch) vid = ytMatch[1];
+            } else if (platform === 'tiktok') {
+                const ttMatch = vid.match(/\/video\/(\d+)/);
+                if (ttMatch) vid = ttMatch[1];
+            }
+
+            const videoId = videoIdHiddenInput.value;
+            const method = videoId ? 'PUT' : 'POST';
+            const url = videoId ? `/admin/videos/${videoId}` : '/admin/videos';
+            const token = localStorage.getItem('adminToken');
+
+            if (!token) {
+                alert('Your session has expired. Please login again.');
+                window.location.href = '/admin/login';
+                return;
+            }
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        title: videoTitleInput.value,
+                        platform: videoPlatformSelect.value,
+                        video_id: vid,
+                        reward: parseFloat(videoRewardInput.value),
+                        duration_seconds: parseInt(videoDurationInput.value),
+                        status: videoStatusSelect.value
+                    })
+                });
+
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        alert('Your session has expired or the token is invalid. Redirecting to login...');
+                        localStorage.removeItem('adminToken');
+                        window.location.href = '/admin/login';
+                        return;
+                    }
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to save video task');
+                }
+                alert(`Video task ${videoId ? 'updated' : 'created'} successfully!`);
+                closeVideoModal();
+                fetchAndRenderVideos(); // Re-fetch and render videos
+            } catch (error) {
+                console.error('Error saving video task:', error);
+                alert('Error saving video task: ' + error.message);
+            }
+        });
+
+        // Handle Delete Video
+        async function deleteVideo(videoId) {
+            if (!confirm('Are you sure you want to delete this video task? This action cannot be undone.')) {
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('adminToken');
+                const response = await fetch(`/admin/videos/${videoId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to delete video task');
+                }
+                alert('Video task deleted successfully!');
+                fetchAndRenderVideos(); // Re-fetch and render videos
+            } catch (error) {
+                console.error('Error deleting video task:', error);
+                alert('Error deleting video task: ' + error.message);
+            }
+        }
+
+        // Event Listeners for filters
+        document.getElementById('video-search').addEventListener('input', () => renderVideos(allVideos));
+        document.getElementById('platform-filter').addEventListener('change', () => renderVideos(allVideos));
+
+        const sidebar = document.getElementById('sidebar'), mobileToggle = document.getElementById('mobile-toggle'), overlay = document.getElementById('sidebar-overlay');
+        function toggleSidebar() { sidebar.classList.toggle('-translate-x-full'); overlay.classList.toggle('hidden'); }
+        mobileToggle.onclick = toggleSidebar; overlay.onclick = toggleSidebar;
+
+        const canvas = document.getElementById('balloon-canvas'), ctx = canvas.getContext('2d');
+        let balloons = [];
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize); resize();
+        class Balloon {
+            constructor() {
+                this.radius = 25; this.x = Math.random() * (canvas.width - 50) + 25; this.y = Math.random() * (canvas.height - 50) + 25;
+                this.dx = (Math.random() - 0.5) * 1.5; this.dy = (Math.random() - 0.5) * 1.5; this.color = `hsla(${Math.random() * 360}, 60%, 50%, 0.2)`;
+            }
+            draw() {
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fillStyle = this.color; ctx.fill();
+                ctx.beginPath(); ctx.arc(this.x - 8, this.y - 8, 6, 0, Math.PI * 2); ctx.fillStyle = 'rgba(255,255,255,0.05)'; ctx.fill();
+            }
+            update(others) {
+                if (this.x + this.radius > canvas.width || this.x - this.radius < 0) this.dx *= -1;
+                if (this.y + this.radius > canvas.height || this.y - this.radius < 0) this.dy *= -1;
+                others.forEach(o => {
+                    if (o === this) return;
+                    const dist = Math.hypot(o.x - this.x, o.y - this.y);
+                    if (dist < this.radius + o.radius) { [this.dx, o.dx] = [o.dx, this.dx]; [this.dy, o.dy] = [o.dy, this.dy]; }
+                });
+                this.x += this.dx; this.y += this.dy; this.draw();
+            }
+        }
+        for (let i = 0; i < 40; i++) balloons.push(new Balloon());
+        function animate() { ctx.clearRect(0, 0, canvas.width, canvas.height); balloons.forEach(b => b.update(balloons)); requestAnimationFrame(animate); }
+        animate();
+    </script>
+</body>

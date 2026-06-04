@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Settings | AdminPoint</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-[#020617] font-sans text-slate-300">
+
+    <!-- Animated Balloon Background -->
+    <canvas id="balloon-canvas" class="fixed inset-0 z-[-1] pointer-events-none"></canvas>
+
+    <!-- Mobile Sidebar Toggle -->
+    <button id="mobile-toggle" class="md:hidden fixed top-6 left-6 z-[60] w-12 h-12 flex items-center justify-center bg-slate-900/90 border border-white/10 rounded-2xl text-blue-500 shadow-2xl active:scale-90 transition-all backdrop-blur-md">
+        <i class="fas fa-bars text-xl"></i>
+    </button>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden md:hidden transition-opacity duration-300"></div>
+
+    <div class="flex min-h-screen relative">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-slate-950/50 backdrop-blur-xl border-r border-white/10 text-slate-400 fixed md:sticky inset-y-0 left-0 z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col flex-shrink-0">
+            <div class="p-6">
+                <span class="text-2xl font-bold text-white">Admin<span class="text-blue-500">Point</span></span>
+            </div>
+            <nav class="flex-1 px-4 space-y-1 mt-4">
+                <a href="admindashboard.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-chart-line w-5"></i>
+                    <span>Overview</span>
+                </a>
+                <a href="adminusermanagement.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-users-cog w-5"></i>
+                    <span>User Management</span>
+                </a>
+                <a href="adminpayouts.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-hand-holding-dollar w-5"></i>
+                    <span>Payout Requests</span>
+                </a>
+                <a href="adminpayments.html" class="flex items-center space-x-3 bg-blue-600 text-white p-3 rounded-xl transition">
+                    <i class="fas fa-credit-card w-5"></i>
+                    <span>Payment Settings</span>
+                </a>
+                <a href="adminsurveys.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-poll-h w-5"></i>
+                    <span>Surveys</span>
+                </a>
+                <a href="adminvideotasks.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fab fa-youtube w-5"></i>
+                    <span>Video Tasks</span>
+                </a>
+                <a href="adminsettings.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-cogs w-5"></i>
+                    <span>System Settings</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6 md:p-10">
+            <header class="mb-10">
+                <h1 class="text-3xl font-bold text-white">Payment Configuration</h1>
+                <p class="text-slate-500 text-sm">Manage user activation fees and payment gateway parameters.</p>
+            </header>
+
+            <div class="max-w-2xl space-y-8">
+                <!-- Activation Fee Card -->
+                <div class="bg-white/5 backdrop-blur-md p-8 rounded-[2.5rem] border border-white/10 shadow-2xl">
+                    <div class="flex items-center space-x-4 mb-8">
+                        <div class="w-12 h-12 bg-blue-600/20 text-blue-500 rounded-2xl flex items-center justify-center text-xl">
+                            <i class="fas fa-unlock-alt"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">User Activation</h3>
+                            <p class="text-slate-500 text-xs">Set the fee required for users to unlock premium features.</p>
+                        </div>
+                    </div>
+
+                    <form id="activation-fee-form" class="space-y-6">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Activation Fee (Ksh)</label>
+                            <div class="relative">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold">Ksh</span>
+                                <input type="number" id="activation-fee-input" required placeholder="1.00" step="0.01" class="w-full pl-14 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-blue-600 transition text-white text-xl font-black">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-bold transition shadow-lg shadow-blue-900/20 active:scale-95">
+                            Update Activation Fee
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Help Note -->
+                <div class="p-6 bg-amber-500/10 border border-amber-500/20 rounded-3xl">
+                    <div class="flex space-x-3">
+                        <i class="fas fa-exclamation-triangle text-amber-500 mt-1"></i>
+                        <p class="text-xs text-amber-200/70 leading-relaxed">
+                            Changing the activation fee will affect all new payment requests immediately. Ensure your M-Pesa/PesaPal instructions are updated to match this value to avoid reconciliation errors.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Auth Check
+        if (!localStorage.getItem('adminToken')) { window.location.href = '/admin/login'; }
+
+        const API_BASE_URL = 'http://localhost:5000';
+        const feeInput = document.getElementById('activation-fee-input');
+        const feeForm = document.getElementById('activation-fee-form');
+
+        // Fetch Current Settings
+        async function fetchSettings() {
+            try {
+                const res = await fetch(`${API_BASE_URL}/admin/settings`, {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
+                });
+                const data = await res.json();
+                if (data.success && data.settings.activation_fee) {
+                    feeInput.value = data.settings.activation_fee;
+                }
+            } catch (err) { console.error("Error fetching settings:", err); }
+        }
+
+        // Update Setting
+        feeForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const newValue = feeInput.value;
+            
+            try {
+                const res = await fetch(`${API_BASE_URL}/admin/settings`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                    },
+                    body: JSON.stringify({ key: 'activation_fee', value: newValue })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('Activation fee updated successfully!');
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (err) { console.error("Error updating fee:", err); }
+        };
+
+        fetchSettings();
+
+        // Sidebar & UI Logic
+        const sidebar = document.getElementById('sidebar'), mobileToggle = document.getElementById('mobile-toggle'), overlay = document.getElementById('sidebar-overlay');
+        function toggleSidebar() { sidebar.classList.toggle('-translate-x-full'); overlay.classList.toggle('hidden'); }
+        mobileToggle.onclick = toggleSidebar; overlay.onclick = toggleSidebar;
+
+        // Balloon Background
+        const canvas = document.getElementById('balloon-canvas'), ctx = canvas.getContext('2d');
+        let balloons = [];
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize); resize();
+        class Balloon {
+            constructor() {
+                this.radius = 25; this.x = Math.random() * (canvas.width - 50) + 25; this.y = Math.random() * (canvas.height - 50) + 25;
+                this.dx = (Math.random() - 0.5) * 1.5; this.dy = (Math.random() - 0.5) * 1.5; this.color = `hsla(${Math.random() * 360}, 60%, 50%, 0.2)`;
+            }
+            draw() {
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fillStyle = this.color; ctx.fill();
+                ctx.beginPath(); ctx.arc(this.x - 8, this.y - 8, 6, 0, Math.PI * 2); ctx.fillStyle = 'rgba(255,255,255,0.05)'; ctx.fill();
+            }
+            update(others) {
+                if (this.x + this.radius > canvas.width || this.x - this.radius < 0) this.dx *= -1;
+                if (this.y + this.radius > canvas.height || this.y - this.radius < 0) this.dy *= -1;
+                others.forEach(o => {
+                    if (o === this) return;
+                    const dist = Math.hypot(o.x - this.x, o.y - this.y);
+                    if (dist < this.radius + o.radius) { [this.dx, o.dx] = [o.dx, this.dx]; [this.dy, o.dy] = [o.dy, this.dy]; }
+                });
+                this.x += this.dx; this.y += this.dy; this.draw();
+            }
+        }
+        for (let i = 0; i < 40; i++) balloons.push(new Balloon());
+        function animate() { ctx.clearRect(0, 0, canvas.width, canvas.height); balloons.forEach(b => b.update(balloons)); requestAnimationFrame(animate); }
+        animate();
+    </script>
+</body>
+</html>

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payout Management | SmartEarn Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-[#020617] font-sans text-slate-300">
+
+    <!-- Animated Balloon Background -->
+    <canvas id="balloon-canvas" class="fixed inset-0 z-[-1] pointer-events-none"></canvas>
+
+    <!-- Mobile Sidebar Toggle -->
+    <button id="mobile-toggle" class="md:hidden fixed top-6 left-6 z-[60] w-12 h-12 flex items-center justify-center bg-slate-900/90 border border-white/10 rounded-2xl text-blue-500 shadow-2xl active:scale-90 transition-all backdrop-blur-md">
+        <i class="fas fa-bars text-xl"></i>
+    </button>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden md:hidden transition-opacity duration-300"></div>
+
+    <div class="flex min-h-screen relative">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-slate-950/50 backdrop-blur-xl border-r border-white/10 text-slate-400 fixed md:sticky inset-y-0 left-0 z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col flex-shrink-0">
+            <div class="p-6">
+                <span class="text-2xl font-bold text-white">SmartEarn <span class="text-blue-500">Admin</span></span>
+            </div>
+            <nav class="flex-1 px-4 space-y-1 mt-4">
+                <a href="admindashboard.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-chart-line w-5"></i>
+                    <span>Overview</span>
+                </a>
+                <a href="adminusermanagement.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-users-cog w-5"></i>
+                    <span>User Management</span>
+                </a>
+                <a href="adminpayouts.html" class="flex items-center space-x-3 bg-blue-600 text-white p-3 rounded-xl transition">
+                    <i class="fas fa-hand-holding-dollar w-5"></i>
+                    <span>Payout Requests</span>
+                </a>
+                <a href="adminsurveys.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-poll-h w-5"></i>
+                    <span>Surveys</span>
+                </a>
+                <a href="adminvideotasks.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fab fa-youtube w-5"></i>
+                    <span>Video Tasks</span>
+                </a>
+                <a href="adminsettings.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-cogs w-5"></i>
+                    <span>System Settings</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6 md:p-10">
+            <header class="mb-10">
+                <h1 class="text-3xl font-bold text-white">Payout Requests</h1>
+                <p class="text-slate-500 text-sm">Review and process user withdrawal applications.</p>
+            </header>
+
+            <!-- Summary Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/10">
+                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Total Pending</p>
+                    <h2 id="pending-total-amount" class="text-3xl font-extrabold text-amber-500">Ksh 0.00</h2>
+                    <p id="pending-total-count" class="text-slate-500 text-[10px] mt-2 font-bold">0 Requests</p>
+                </div>
+                <div class="bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/10">
+                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Total Paid</p>
+                    <h2 id="total-paid-amount" class="text-3xl font-extrabold text-emerald-500">Ksh 0.00</h2>
+                    <p id="total-paid-count" class="text-slate-500 text-[10px] mt-2 font-bold">0 Completed</p>
+                </div>
+                <div class="bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/10">
+                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">System Reserve</p>
+                    <h2 id="system-reserve-amount" class="text-3xl font-extrabold text-white">Ksh 0.00</h2>
+                    <p class="text-blue-500 text-[10px] mt-2 font-bold">Withdrawal Liquidity</p>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="flex flex-col md:flex-row gap-4 mb-8">
+                <div class="relative flex-1">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                    <input type="text" id="payout-search" placeholder="Search by name or account..." class="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-blue-600 transition text-white">
+                </div>
+                <select id="payout-status-filter" class="bg-white/5 border border-white/10 rounded-2xl px-6 py-3 text-white outline-none focus:ring-2 focus:ring-blue-600">
+                    <option value="all">All Status</option>
+                    <option value="pending" selected>Pending</option>
+                    <option value="completed">Approved</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+            </div>
+
+            <!-- Payouts Table -->
+            <div class="bg-white/5 backdrop-blur-md rounded-[2.5rem] border border-white/10 overflow-hidden shadow-2xl">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-white/5 text-[10px] uppercase font-bold text-slate-500 tracking-widest">
+                            <tr>
+                                <th class="px-8 py-5">User & Method</th>
+                                <th class="px-8 py-5">Account Details</th>
+                                <th class="px-8 py-5">Amount</th>
+                                <th class="px-8 py-5">User Balance</th>
+                                <th class="px-8 py-5">Date</th>
+                                <th class="px-8 py-5">Status</th>
+                                <th class="px-8 py-5 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="payout-table-body" class="divide-y divide-white/5">
+                            <!-- Rows will be injected by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Processing Modal -->
+    <div id="payout-modal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm hidden px-4">
+        <div class="bg-[#0f172a] border border-white/10 p-8 rounded-[2.5rem] shadow-2xl max-w-md w-full">
+            <h2 class="text-2xl font-bold text-white mb-2">Process Payout</h2>
+            <p id="modal-payout-info" class="text-slate-400 text-sm mb-6">Process Ksh 1,500 for Kevin Maina?</p>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Transaction ID / Reference</label>
+                    <input type="text" id="payout-ref" placeholder="Enter M-Pesa or Bank Ref" class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Admin Note (Internal)</label>
+                    <textarea id="payout-note" rows="2" class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white"></textarea>
+                </div>
+            </div>
+
+            <div class="flex gap-3 mt-8">
+                <button onclick="closePayoutModal()" class="flex-1 px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-slate-300 font-bold hover:bg-white/10 transition">Cancel</button>
+                <button onclick="completePayout('completed')" class="flex-1 px-6 py-3 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 transition">Mark Paid</button>
+            </div>
+            <button onclick="completePayout('rejected')" class="w-full mt-3 px-6 py-3 rounded-xl bg-red-600/10 border border-red-600/20 text-red-500 font-bold hover:bg-red-600/20 transition">Reject Request</button>
+        </div>
+    </div>
+
+    <script>
+        // Client-side authentication check
+        if (!localStorage.getItem('adminToken')) {
+            window.location.href = '/admin/login';
+        }
+
+        const API_BASE_URL = 'http://localhost:5000';
+
+        let allWithdrawals = []; // Stores all fetched withdrawals
+
+        // Fetch Withdrawals from API
+        async function fetchWithdrawals() {
+            try {
+                const token = localStorage.getItem('adminToken');
+                const response = await fetch(`${API_BASE_URL}/admin/withdrawals`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!response.ok) {
+                    if (response.status === 401) window.location.href = '/admin/login';
+                    throw new Error('Failed to fetch withdrawals');
+                }
+                const data = await response.json();
+                allWithdrawals = data.withdrawals;
+                renderPayouts(document.getElementById('payout-search').value, document.getElementById('payout-status-filter').value);
+                updateSummaryStats(allWithdrawals);
+            } catch (error) {
+                console.error('Error fetching withdrawals:', error);
+            }
+        }
+
+        async function fetchSystemStats() {
+            try {
+                const token = localStorage.getItem('adminToken');
+                const response = await fetch(`${API_BASE_URL}/admin/stats`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('system-reserve-amount').textContent = `Ksh ${parseFloat(data.stats.totalLiability).toLocaleString(undefined, { 
+                        minimumFractionDigits: 2, maximumFractionDigits: 2 
+                    })}`;
+                }
+            } catch (err) { console.error("Stats fetch error:", err); }
+        }
+
+        function updateSummaryStats(withdrawals) {
+            const pending = withdrawals.filter(w => w.status === 'pending');
+            const completed = withdrawals.filter(w => w.status === 'completed');
+
+            const pendingAmount = pending.reduce((sum, w) => sum + parseFloat(w.amount), 0);
+            const completedAmount = completed.reduce((sum, w) => sum + parseFloat(w.amount), 0);
+
+            document.getElementById('pending-total-amount').textContent = `Ksh ${pendingAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            document.getElementById('pending-total-count').textContent = `${pending.length} Requests`;
+
+            document.getElementById('total-paid-amount').textContent = `Ksh ${completedAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            document.getElementById('total-paid-count').textContent = `${completed.length} Completed`;
+        }
+
+        // Render Function
+        function renderPayouts(filterText = '', filterStatus = 'pending') {
+            const tbody = document.getElementById('payout-table-body');
+            tbody.innerHTML = '';
+
+            const filtered = allWithdrawals.filter(p => {
+                const userDetails = `${p.full_name || ''} ${p.username || ''} ${p.email || ''} ${p.phone_number || ''} ${p.payout_identifier || ''}`.toLowerCase();
+                const matchSearch = userDetails.includes(filterText.toLowerCase());
+                const pStatus = (p.status || 'pending').toLowerCase();
+                const matchStatus = filterStatus === 'all' || pStatus === filterStatus.toLowerCase();
+                return matchSearch && matchStatus;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="px-8 py-10 text-center text-slate-500 italic">No payout requests found matching your criteria.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(p => {
+                const statusColors = {
+                    pending: "bg-amber-500/10 text-amber-500",
+                    completed: "bg-emerald-500/10 text-emerald-500",
+                    rejected: "bg-red-500/10 text-red-500"
+                };
+
+                const methodIcon = p.method === 'M-Pesa' ? 'fas fa-mobile-alt text-emerald-500' : 
+                                  p.method === 'PAYPAL' ? 'fab fa-paypal text-blue-500' : 'fas fa-university text-slate-400';
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-white/5 transition group">
+                        <td class="px-8 py-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-xl">
+                                    <i class="${methodIcon}"></i>
+                                </div>
+                                <div>
+                                    <p class="text-white font-bold text-sm">${p.full_name}</p>
+                                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">${p.method}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-8 py-4">
+                            <p class="text-slate-400 font-mono text-xs">${p.payout_identifier}</p>
+                        </td>
+                        <td class="px-8 py-4">
+                            <p class="text-white font-extrabold text-sm">Ksh ${parseFloat(p.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                        </td>
+                        <td class="px-8 py-4">
+                            <p class="text-slate-400 text-sm font-mono">Ksh ${(parseFloat(p.user_balance) || 0).toLocaleString()}</p>
+                        </td>
+                        <td class="px-8 py-4">
+                            <p class="text-slate-500 text-xs">${new Date(p.created_at).toLocaleString()}</p>
+                        </td>
+                        <td class="px-8 py-4">
+                            <span class="${statusColors[p.status]} px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">${p.status}</span>
+                        </td>
+                        <td class="px-8 py-4 text-right">
+                            ${p.status === 'pending' ? 
+                                `<button onclick="openPayoutModal('${p.id}')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg text-xs font-bold transition shadow-lg shadow-blue-900/20">Process</button>` :
+                                `<button class="text-slate-600 cursor-not-allowed text-xs font-bold" disabled>Finalized</button>`
+                            }
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Modal Control
+        let activePayoutId = null;
+        function openPayoutModal(id) {
+            activePayoutId = id;
+            const p = allWithdrawals.find(x => x.id == id);
+            document.getElementById('modal-payout-info').innerText = `Process Ksh ${parseFloat(p.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} for ${p.full_name}?`;
+            document.getElementById('payout-modal').classList.remove('hidden');
+        }
+        function closePayoutModal() {
+            document.getElementById('payout-modal').classList.add('hidden');
+            document.getElementById('payout-ref').value = '';
+            document.getElementById('payout-note').value = '';
+            activePayoutId = null;
+        }
+        async function completePayout(status) {
+            const ref = document.getElementById('payout-ref').value;
+            const note = document.getElementById('payout-note').value;
+
+            if (status === 'completed' && !ref) {
+                alert('Please enter a Transaction Reference for completed payments.');
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('adminToken');
+                const response = await fetch(`${API_BASE_URL}/admin/withdrawals/${activePayoutId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ 
+                        status, 
+                        transaction_ref: ref,
+                        admin_note: note
+                    })
+                });
+
+                if (!response.ok) {
+                    if (response.status === 401) window.location.href = '/admin/login';
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to process payout');
+                }
+
+                alert(`Payout ${status === 'completed' ? 'approved' : 'rejected'} successfully!`);
+                closePayoutModal();
+                fetchSystemStats(); // Update liability after status change
+                fetchWithdrawals(); // Re-fetch and render all payouts
+            } catch (error) {
+                console.error('Error processing payout:', error);
+                alert('Error processing payout: ' + error.message);
+            }
+        }
+
+        // Event Listeners
+        document.getElementById('payout-search').oninput = (e) => renderPayouts(e.target.value, document.getElementById('payout-status-filter').value);
+        document.getElementById('payout-status-filter').onchange = (e) => renderPayouts(document.getElementById('payout-search').value, e.target.value);
+
+        // Initial Load
+        fetchSystemStats();
+        fetchWithdrawals();
+
+        // Mobile Sidebar Functionality
+        const sidebar = document.getElementById('sidebar');
+        const mobileToggle = document.getElementById('mobile-toggle');
+        const overlay = document.getElementById('sidebar-overlay');
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+        mobileToggle.onclick = toggleSidebar;
+        overlay.onclick = toggleSidebar;
+
+        // Balloon Background Logic
+        const canvas = document.getElementById('balloon-canvas');
+        const ctx = canvas.getContext('2d');
+        let balloons = [];
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Balloon {
+            constructor() {
+                this.radius = 25;
+                this.x = Math.random() * (canvas.width - 50) + 25;
+                this.y = Math.random() * (canvas.height - 50) + 25;
+                this.dx = (Math.random() - 0.5) * 1.5;
+                this.dy = (Math.random() - 0.5) * 1.5;
+                this.color = `hsla(${Math.random() * 360}, 60%, 50%, 0.2)`;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(this.x - 8, this.y - 8, 6, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255,255,255,0.05)';
+                ctx.fill();
+
+                // Draw string
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y + this.radius);
+                ctx.lineTo(this.x, this.y + this.radius + 15);
+                ctx.strokeStyle = this.color;
+                ctx.stroke();
+            }
+            update(others) {
+                if (this.x + this.radius > canvas.width || this.x - this.radius < 0) this.dx *= -1;
+                if (this.y + this.radius > canvas.height || this.y - this.radius < 0) this.dy *= -1;
+
+                others.forEach(o => {
+                    if (o === this) return;
+                    const dist = Math.hypot(o.x - this.x, o.y - this.y);
+                    if (dist < this.radius + o.radius) {
+                        [this.dx, o.dx] = [o.dx, this.dx];
+                        [this.dy, o.dy] = [o.dy, this.dy];
+                    }
+                });
+
+                this.x += this.dx;
+                this.y += this.dy;
+                this.draw();
+            }
+        }
+
+        for (let i = 0; i < 40; i++) balloons.push(new Balloon());
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            balloons.forEach(b => b.update(balloons));
+            requestAnimationFrame(animate);
+        }
+        animate();
+    </script>
+</body>
+</html>

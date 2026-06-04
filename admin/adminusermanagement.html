@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management | AdminPoint</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-[#020617] font-sans text-slate-300">
+    <script>
+        // Client-side authentication check
+        if (!localStorage.getItem('adminToken')) {
+            window.location.href = '/admin/login';
+        }
+    </script>
+
+
+    <!-- Animated Balloon Background -->
+    <canvas id="balloon-canvas" class="fixed inset-0 z-[-1] pointer-events-none"></canvas>
+
+    <!-- Mobile Sidebar Toggle -->
+    <button id="mobile-toggle" class="md:hidden fixed top-6 left-6 z-[60] w-12 h-12 flex items-center justify-center bg-slate-900/90 border border-white/10 rounded-2xl text-blue-500 shadow-2xl active:scale-90 transition-all backdrop-blur-md">
+        <i class="fas fa-bars text-xl"></i>
+    </button>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden md:hidden transition-opacity duration-300"></div>
+
+    <div class="flex min-h-screen relative">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-slate-950/50 backdrop-blur-xl border-r border-white/10 text-slate-400 fixed md:sticky inset-y-0 left-0 z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col flex-shrink-0">
+            <div class="p-6">
+                <span class="text-2xl font-bold text-white">Admin<span class="text-blue-500">Point</span></span>
+            </div>
+            <nav class="flex-1 px-4 space-y-1 mt-4">
+                <a href="admindashboard.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-chart-line w-5"></i>
+                    <span>Overview</span>
+                </a>
+                <a href="adminusermanagement.html" class="flex items-center space-x-3 bg-blue-600 text-white p-3 rounded-xl transition">
+                    <i class="fas fa-users-cog w-5"></i>
+                    <span>User Management</span>
+                </a>
+                <a href="adminpayouts.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-hand-holding-dollar w-5"></i>
+                    <span>Payout Requests</span>
+                </a>
+                <a href="adminsurveys.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-poll-h w-5"></i>
+                    <span>Surveys</span>
+                </a>
+                <a href="adminvideotasks.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fab fa-youtube w-5"></i>
+                    <span>Video Tasks</span>
+                </a>
+                <a href="adminsettings.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-cogs w-5"></i>
+                    <span>System Settings</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6 md:p-10">
+            <header class="mb-10">
+                <h1 class="text-3xl font-bold text-white">User Management</h1>
+                <p class="text-slate-500 text-sm">Monitor user activity, adjust balances, and manage account statuses.</p>
+            </header>
+
+            <!-- Summary Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                <div class="bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/10">
+                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Total Registered</p>
+                    <h2 id="summary-total-users" class="text-3xl font-extrabold text-white">0</h2>
+                    <p class="text-slate-500 text-[10px] mt-2 font-bold">Lifetime users</p>
+                </div>
+                <div class="bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/10">
+                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Total Active Users</p>
+                    <h2 id="summary-active-users" class="text-3xl font-extrabold text-emerald-500">0</h2>
+                    <p class="text-emerald-400 text-[10px] mt-2 font-bold">Verified & Active</p>
+                </div>
+                <div class="bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/10">
+                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Total Liability</p>
+                    <h2 id="summary-total-balance" class="text-3xl font-extrabold text-white">Ksh 0.00</h2>
+                    <p class="text-blue-400 text-[10px] mt-2 font-bold">Sum of all balances</p>
+                </div>
+            </div>
+
+            <!-- Filters and Search -->
+            <div class="flex flex-col md:flex-row gap-4 mb-8">
+                <div class="relative flex-1">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                    <input type="text" id="user-search" placeholder="Search by name, email, or phone..." class="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-blue-600 transition text-white">
+                </div>
+                <select id="activation-filter" class="bg-white/5 border border-white/10 rounded-2xl px-6 py-3 text-white outline-none focus:ring-2 focus:ring-blue-600">
+                    <option value="all">All Activation</option>
+                    <option value="active">Activated (Paid)</option>
+                    <option value="pending">Pending (Unpaid)</option>
+                </select>
+                <select id="status-filter" class="bg-white/5 border border-white/10 rounded-2xl px-6 py-3 text-white outline-none focus:ring-2 focus:ring-blue-600">
+                    <option value="all">Account: All</option>
+                    <option value="active">Account: Active</option>
+                    <option value="suspended">Account: Suspended</option>
+                </select>
+            </div>
+
+            <!-- Users Table -->
+            <div class="bg-white/5 backdrop-blur-md rounded-[2.5rem] border border-white/10 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-white/5 text-[10px] uppercase font-bold text-slate-500 tracking-widest">
+                            <tr>
+                                <th class="px-8 py-5">User Details</th>
+                                <th class="px-8 py-5">Membership</th>
+                                <th class="px-8 py-5">Verification</th>
+                                <th class="px-8 py-5">Balance</th>
+                                <th class="px-8 py-5">Status</th>
+                                <th class="px-8 py-5 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="user-table-body" class="divide-y divide-white/5"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div id="edit-modal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm hidden px-4">
+        <div class="bg-[#0f172a] border border-white/10 p-8 rounded-[2.5rem] shadow-2xl max-w-md w-full">
+            <input type="hidden" id="edit-user-id">
+            <h2 class="text-2xl font-bold text-white mb-2">Edit User</h2>
+            <p id="modal-user-name" class="text-slate-400 text-sm mb-6">Updating details for John Doe</p>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Adjust Balance (Ksh)</label>
+                    <input type="number" step="0.01" id="edit-balance" class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white">
+                </div>
+            </div>
+
+            <div class="flex gap-3 mt-8">
+                <button onclick="closeModal()" class="flex-1 px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-slate-300 font-bold hover:bg-white/10 transition">Cancel</button>
+                <button onclick="saveUserChanges()" class="flex-1 px-6 py-3 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-10 right-10 z-[150] space-y-3 pointer-events-none"></div>
+
+    <script>
+        // Mobile Sidebar Functionality
+        const sidebar = document.getElementById('sidebar');
+        const mobileToggle = document.getElementById('mobile-toggle');
+        const overlay = document.getElementById('sidebar-overlay');
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+        mobileToggle.onclick = toggleSidebar;
+        overlay.onclick = toggleSidebar;
+
+        let allUsers = [];
+
+        // Fetch Users from API
+        async function fetchUsers() {
+            try {
+                const response = await fetch('/admin/users', {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    allUsers = data.users;
+                    renderUsers();
+                    updateSummary(allUsers);
+                }
+            } catch (err) {
+                console.error('Fetch error:', err);
+            }
+        }
+
+        // Update Summary Stats
+        function updateSummary(users) {
+            const total = users.length;
+            const active = users.filter(u => u.is_active === true).length;
+            const totalBalance = users.reduce((sum, u) => sum + (parseFloat(u.balance) || 0), 0);
+
+            document.getElementById('summary-total-users').textContent = total.toLocaleString();
+            document.getElementById('summary-active-users').textContent = active.toLocaleString();
+            document.getElementById('summary-total-balance').textContent = `Ksh ${totalBalance.toLocaleString(undefined, { 
+                minimumFractionDigits: 2, maximumFractionDigits: 2 
+            })}`;
+        }
+
+        // Modal Logic
+        const modal = document.getElementById('edit-modal');
+        function openEditModal(userId) {
+            const user = allUsers.find(u => u.id == userId);
+            if(!user) return;
+
+            document.getElementById('edit-user-id').value = user.id;
+            document.getElementById('modal-user-name').innerText = `Updating details for ${user.full_name}`;
+            document.getElementById('edit-balance').value = user.balance;
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            modal.classList.add('hidden');
+        }
+
+        async function saveUserChanges() {
+            const id = document.getElementById('edit-user-id').value;
+            const body = {
+                balance: parseFloat(document.getElementById('edit-balance').value),
+                status: allUsers.find(u => u.id == id).status
+            };
+
+            try {
+                const response = await fetch(`/admin/users/${id}`, {
+                    method: 'PUT',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                    },
+                    body: JSON.stringify(body)
+                });
+                const data = await response.json();
+                if (data.success) {
+                    showToast('User updated successfully', 'success');
+                    closeModal();
+                    fetchUsers();
+                }
+            } catch (err) {
+                showToast('Failed to update user', 'error');
+            }
+        }
+
+        async function toggleBan(userId) {
+            if(!confirm('Are you sure you want to change this user\'s status?')) return;
+            
+            try {
+                const response = await fetch(`/admin/users/${userId}/status`, {
+                    method: 'PATCH',
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
+                });
+                const data = await response.json();
+                if(data.success) {
+                    showToast(data.message || 'Status updated', 'success');
+                    fetchUsers();
+                }
+            } catch (err) {
+                showToast('Failed to change status', 'error');
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-emerald-600' : 'bg-red-600';
+            const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+
+            toast.className = `${bgColor} text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center space-x-3 pointer-events-auto transition-all duration-300 transform translate-x-full opacity-0`;
+            toast.innerHTML = `
+                <i class="fas ${icon}"></i>
+                <span class="text-sm font-bold tracking-wide">${message}</span>
+            `;
+
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.remove('translate-x-full', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('translate-x-full', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        function renderUsers() {
+            const filterText = document.getElementById('user-search').value.toLowerCase();
+            const filterStatus = document.getElementById('status-filter').value;
+            const filterActivation = document.getElementById('activation-filter').value;
+
+            const tbody = document.getElementById('user-table-body');
+            tbody.innerHTML = '';
+
+            const filtered = allUsers.filter(u => {
+                const matchSearch = (u.full_name || '').toLowerCase().includes(filterText) || 
+                                   (u.email || '').toLowerCase().includes(filterText) ||
+                                   (u.phone_number || '').includes(filterText);
+                const matchStatus = filterStatus === 'all' || u.status.toLowerCase() === filterStatus;
+                const matchActivation = filterActivation === 'all' || 
+                                       (filterActivation === 'active' && u.is_active) || 
+                                       (filterActivation === 'pending' && !u.is_active);
+                return matchSearch && matchStatus && matchActivation;
+            });
+
+            filtered.forEach(u => {
+                const initials = u.full_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                const isSuspended = u.status === 'suspended';
+                const statusColor = !isSuspended ? 'text-green-500 bg-green-500/10' : 'text-red-500 bg-red-500/10';
+                
+                const isVerified = u.is_active === true;
+                const verifyColor = isVerified ? 'text-emerald-400 bg-emerald-400/10' : 'text-amber-500 bg-amber-500/10';
+                const verifyText = isVerified ? 'Verified' : 'Pending';
+
+                let membershipColor = 'text-slate-400 bg-white/10';
+                if (u.membership_tier === 'Elite') membershipColor = 'text-amber-500 bg-amber-500/10';
+                else if (u.membership_tier === 'Pro Earning') membershipColor = 'text-blue-400 bg-blue-600/10';
+                
+                const banIcon = isSuspended ? 'fa-check-circle' : 'fa-ban';
+                const banBtnColor = isSuspended ? 'text-green-500 hover:bg-green-600/20' : 'text-red-500 hover:bg-red-600/20';
+                
+                tbody.innerHTML += `
+                    <tr class="hover:bg-white/5 transition">
+                        <td class="px-8 py-4">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded-full bg-blue-600/20 flex items-center justify-center text-blue-500 font-extrabold text-xs">${initials}</div>
+                                <div>
+                                    <p class="text-white font-bold text-sm">${u.full_name}</p>
+                                    <p class="text-[10px] text-slate-500">${u.email}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-8 py-4">
+                            <span class="${membershipColor} px-3 py-1 rounded-lg text-[10px] font-bold uppercase">${u.membership} Member</span>
+                        </td> 
+                        <td class="px-8 py-4">
+                            <span class="${verifyColor} px-3 py-1 rounded-lg text-[10px] font-bold uppercase">${verifyText}</span>
+                        </td>
+                        <td class="px-8 py-4 text-white font-mono text-sm">Ksh ${u.balance.toLocaleString()}</td>
+                        <td class="px-8 py-4">
+                            <span class="${statusColor} px-3 py-1 rounded-full text-[10px] font-bold uppercase">${u.status}</span>
+                        </td>
+                        <td class="px-8 py-4 text-right">
+                            <div class="flex justify-end space-x-2">
+                                <button onclick="openEditModal('${u.id}')" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-blue-600/20 text-blue-500 transition"><i class="fas fa-edit text-xs"></i></button>
+                                <button onclick="toggleBan('${u.id}')" class="w-8 h-8 rounded-lg bg-white/5 ${banBtnColor} transition"><i class="fas ${banIcon} text-xs"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        document.getElementById('user-search').oninput = renderUsers;
+        document.getElementById('status-filter').onchange = renderUsers;
+        document.getElementById('activation-filter').onchange = renderUsers;
+
+        fetchUsers();
+
+        // Balloon Background Logic
+        const canvas = document.getElementById('balloon-canvas');
+        const ctx = canvas.getContext('2d');
+        let balloons = [];
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Balloon {
+            constructor() {
+                this.radius = 25;
+                this.x = Math.random() * (canvas.width - 50) + 25;
+                this.y = Math.random() * (canvas.height - 50) + 25;
+                this.dx = (Math.random() - 0.5) * 1.5;
+                this.dy = (Math.random() - 0.5) * 1.5;
+                this.color = `hsla(${Math.random() * 360}, 60%, 50%, 0.2)`;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(this.x - 8, this.y - 8, 6, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255,255,255,0.05)';
+                ctx.fill();
+            }
+            update(others) {
+                if (this.x + this.radius > canvas.width || this.x - this.radius < 0) this.dx *= -1;
+                if (this.y + this.radius > canvas.height || this.y - this.radius < 0) this.dy *= -1;
+
+                others.forEach(o => {
+                    if (o === this) return;
+                    const dist = Math.hypot(o.x - this.x, o.y - this.y);
+                    if (dist < this.radius + o.radius) {
+                        [this.dx, o.dx] = [o.dx, this.dx];
+                        [this.dy, o.dy] = [o.dy, this.dy];
+                    }
+                });
+
+                this.x += this.dx;
+                this.y += this.dy;
+                this.draw();
+            }
+        }
+
+        for (let i = 0; i < 40; i++) balloons.push(new Balloon());
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            balloons.forEach(b => b.update(balloons));
+            requestAnimationFrame(animate);
+        }
+        animate();
+    </script>
+</body>
+</html>

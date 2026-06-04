@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucky Spin - SmartEarn</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            color: #ffffff !important;
+        }
+
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05) !important;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        h1 { color: #ffffff; margin-bottom: 0.5rem; }
+        p { color: #aaaaaa; margin-bottom: 1.5rem; }
+
+        .wheel-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 20px auto;
+        }
+
+        #wheel {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 8px solid rgba(255, 255, 255, 0.1);
+            transition: transform 3s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+            background: conic-gradient(
+                #ff6384 0deg 45deg, 
+                #36a2eb 45deg 90deg, 
+                #ffce56 90deg 135deg, 
+                #4bc0c0 135deg 180deg, 
+                #9966ff 180deg 225deg, 
+                #ff9f40 225deg 270deg,
+                #48c9b0 270deg 315deg,
+                #a569bd 315deg 360deg
+            );
+        }
+
+        .segment-label {
+            position: absolute;
+            width: 50%;
+            height: 30px;
+            top: calc(50% - 15px);
+            left: 50%;
+            transform-origin: left center;
+            text-align: right;
+            padding-right: 15px;
+            box-sizing: border-box;
+            font-weight: bold;
+            font-size: 0.75rem;
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            pointer-events: none;
+        }
+
+        .pointer {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 30px solid #e74c3c;
+            z-index: 100;
+        }
+
+        .btn {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 20px;
+        }
+
+        .btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        #cooldown-timer {
+            margin-top: 15px;
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        #result {
+            margin-top: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2ecc71;
+        }
+
+        #balloon-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="bg-[#020617] font-sans text-slate-300">
+
+<canvas id="balloon-canvas"></canvas>
+
+    <!-- Mobile Sidebar Toggle Button -->
+    <button id="mobile-toggle" class="md:hidden fixed top-6 left-6 z-[60] w-12 h-12 flex items-center justify-center bg-slate-900/90 border border-white/10 rounded-2xl text-blue-500 shadow-2xl active:scale-90 transition-all backdrop-blur-md">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 7h16M4 12h10M4 17h16"></path>
+        </svg>
+    </button>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden md:hidden transition-opacity duration-300"></div>
+
+    <div class="flex min-h-screen relative">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-slate-950/50 backdrop-blur-xl border-r border-white/10 text-slate-400 fixed md:sticky inset-y-0 left-0 z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col flex-shrink-0">
+            <div class="p-6">
+                <span class="text-2xl font-bold text-white">Earn<span class="text-blue-500">Point</span></span>
+            </div>
+            <nav class="flex-1 px-4 space-y-1 mt-4">
+                <a href="dashboard.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-chart-pie w-5"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="spin.html" class="flex items-center space-x-3 bg-blue-600 text-white p-3 rounded-xl transition">
+                    <i class="fas fa-dharmachakra w-5"></i>
+                    <span>Lucky Spin</span>
+                </a>
+                <a href="youtubevideos.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fab fa-youtube w-5"></i>
+                    <span>YouTube Rewards</span>
+                </a>
+                <a href="tiktok_videos.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fab fa-tiktok w-5"></i>
+                    <span>TikTok Rewards</span>
+                </a>
+                <a href="surveys.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-poll-h w-5"></i>
+                    <span>Surveys</span>
+                </a>
+                <a href="refferals.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-users w-5"></i>
+                    <span>Referrals</span>
+                </a>
+                <a href="wallet.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-wallet w-5"></i>
+                    <span>Withdraw</span>
+                </a>
+                <a href="membership.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-crown w-5"></i>
+                    <span>Membership</span>
+                </a>
+                <a href="settings.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-cog w-5"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+            <div class="p-4 border-t border-white/10">
+                <div class="flex items-center space-x-3 p-2">
+                    <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs">JD</div>
+                    <div class="text-xs">
+                        <p id="sidebar-name" class="text-white font-bold">Loading...</p>
+                        <p id="sidebar-role" class="text-slate-500 text-[10px] uppercase font-bold tracking-tighter">User</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6 md:p-10 flex items-center justify-center">
+            <div class="container">
+                <h1>Lucky Wheel</h1>
+                <p>Spin every 24 hours to win rewards!</p>
+
+                <div class="wheel-container">
+                    <div class="pointer"></div>
+                    <div id="wheel"></div>
+                </div>
+
+                <button id="spin-btn" class="btn">Spin Now!</button>
+                <div id="result"></div>
+                <div id="cooldown-timer"></div>
+            </div>
+        </main>
+    </div>
+
+<script>
+    // Mobile Sidebar Functionality
+    const sidebar = document.getElementById('sidebar');
+    const mobileToggle = document.getElementById('mobile-toggle');
+    const overlay = document.getElementById('sidebar-overlay');
+
+    function toggleSidebar() {
+        const isOpen = sidebar.classList.contains('translate-x-0');
+        if (isOpen) {
+            sidebar.classList.replace('translate-x-0', '-translate-x-full');
+            overlay.classList.add('hidden');
+            overlay.style.opacity = '0';
+        } else {
+            sidebar.classList.replace('-translate-x-full', 'translate-x-0');
+            overlay.classList.remove('hidden');
+            setTimeout(() => overlay.style.opacity = '1', 10);
+        }
+    }
+
+    mobileToggle.addEventListener('click', toggleSidebar);
+    overlay.addEventListener('click', toggleSidebar);
+
+    // Sidebar User Data Loading
+    async function loadSidebarData() {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        try {
+            const response = await fetch('/api/users/profile', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!response.ok) throw new Error('Failed to fetch profile');
+            const user = await response.json();
+            document.getElementById('sidebar-name').innerText = user.full_name;
+            if (user.membership_name) {
+                document.getElementById('sidebar-role').innerText = `${user.membership_name} Member`;
+            }
+        } catch (error) {
+            console.error('Sidebar Data Error:', error);
+        }
+    }
+    loadSidebarData();
+
+    const wheel = document.getElementById('wheel');
+    const spinBtn = document.getElementById('spin-btn');
+    const resultDisplay = document.getElementById('result');
+    const timerDisplay = document.getElementById('cooldown-timer');
+
+    // Segments match backend: 0:50.00, 1:5.00, 2:25.00, 3:8.00, 4:40.00, 5:0, 6:15.00, 7:10.00
+    const REWARDS = ["Ksh 50.00", "Ksh 5.00", "Ksh 25.00", "Ksh 8.00", "Ksh 40.00", "Try Again", "Ksh 15.00", "Ksh 10.00"];
+    const COOLDOWN_TIME = 24 * 60 * 60 * 1000; // 24 hours in ms
+
+    // Initialize wheel labels
+    REWARDS.forEach((reward, i) => {
+        const label = document.createElement('div');
+        label.className = 'segment-label';
+        label.innerText = reward;
+        // Center text in segment: (i * 45deg) + 22.5deg offset from top (-90deg initial div orientation)
+        const rotation = (i * 45) + 22.5 - 90;
+        label.style.transform = `rotate(${rotation}deg)`;
+        wheel.appendChild(label);
+    });
+
+    function updateTimer(serverWaitTime = null) {
+        if (serverWaitTime) localStorage.setItem('lastSpin', Date.now() - (COOLDOWN_TIME - serverWaitTime));
+        
+        const lastSpin = localStorage.getItem('lastSpin');
+        if (!lastSpin) return;
+
+        const now = Date.now();
+        const timePassed = now - parseInt(lastSpin);
+
+        if (timePassed < COOLDOWN_TIME) {
+            const remaining = COOLDOWN_TIME - timePassed;
+            const hours = Math.floor(remaining / (1000 * 60 * 60));
+            const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+
+            timerDisplay.innerText = `Next spin in: ${hours}h ${minutes}m ${seconds}s`;
+            spinBtn.disabled = true;
+            setTimeout(updateTimer, 1000);
+        } else {
+            timerDisplay.innerText = "";
+            spinBtn.disabled = false;
+        }
+    }
+
+    spinBtn.addEventListener('click', async () => {
+        spinBtn.disabled = true;
+        resultDisplay.innerText = "Requesting Spin...";
+        
+        try {
+            const response = await fetch('/api/tasks/spin', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}` 
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                if (data.waitTime) updateTimer(data.waitTime);
+                throw new Error(data.message || "Spin failed");
+            }
+
+            // Calculate rotation: (3600 degrees for 10 spins) + (offset for prizeIndex)
+            // Each segment is 45 degrees (360 / 8)
+            const segmentAngle = 45;
+            // Subtract 22.5 to land in the middle of the segment
+            const targetDegree = 3600 + (360 - (data.prizeIndex * segmentAngle)) - 22.5;
+            
+            wheel.style.transform = `rotate(${targetDegree}deg)`;
+            resultDisplay.innerText = "Good Luck!";
+
+            setTimeout(() => {
+                resultDisplay.innerText = data.message;
+                localStorage.setItem('lastSpin', Date.now().toString());
+                updateTimer();
+            }, 3000);
+
+        } catch (error) {
+            resultDisplay.innerText = error.message;
+            spinBtn.disabled = false;
+        }
+    });
+
+    // Initial check on load
+    updateTimer();
+
+    // Balloon Background Logic
+    const canvas = document.getElementById('balloon-canvas');
+    const ctx = canvas.getContext('2d');
+    let balloons = [];
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Balloon {
+        constructor() {
+            this.radius = 25; // 50px diameter
+            this.x = Math.random() * (canvas.width - this.radius * 2) + this.radius;
+            this.y = Math.random() * (canvas.height - this.radius * 2) + this.radius;
+            this.dx = (Math.random() - 0.5) * 2;
+            this.dy = (Math.random() - 0.5) * 2;
+            this.color = `hsla(${Math.random() * 360}, 70%, 60%, 0.3)`;
+        }
+
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fillStyle = this.color;
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(this.x - this.radius/3, this.y - this.radius/3, this.radius/4, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(this.x, this.y + this.radius);
+            ctx.lineTo(this.x - 5, this.y + this.radius + 10);
+            ctx.lineTo(this.x + 5, this.y + this.radius + 10);
+            ctx.closePath();
+            ctx.fillStyle = this.color;
+            ctx.fill();
+        }
+
+        update(others) {
+            if (this.x + this.radius > canvas.width || this.x - this.radius < 0) this.dx = -this.dx;
+            if (this.y + this.radius > canvas.height || this.y - this.radius < 0) this.dy = -this.dy;
+
+            for (let other of others) {
+                if (this === other) continue;
+                const dx = other.x - this.x;
+                const dy = other.y - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if (distance < this.radius + other.radius) {
+                    const tempDx = this.dx;
+                    const tempDy = this.dy;
+                    this.dx = other.dx;
+                    this.dy = other.dy;
+                    other.dx = tempDx;
+                    other.dy = tempDy;
+                    const overlap = (this.radius + other.radius - distance) / 2;
+                    this.x -= (dx / distance) * overlap;
+                    this.y -= (dy / distance) * overlap;
+                }
+            }
+            this.x += this.dx;
+            this.y += this.dy;
+            this.draw();
+        }
+    }
+
+    for (let i = 0; i < 50; i++) balloons.push(new Balloon());
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        balloons.forEach(b => b.update(balloons));
+        requestAnimationFrame(animate);
+    }
+    animate();
+
+</script>
+
+</body>
+</html>

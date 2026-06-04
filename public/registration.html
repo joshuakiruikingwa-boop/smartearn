@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | SmartEarn</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-[#020617] font-sans min-h-screen text-slate-300">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center"> 
+                    <a href="index.html" class="text-2xl font-bold tracking-tight text-white">Smart<span class="text-blue-600">Earn</span></a>
+                </div>
+                <div class="hidden md:flex space-x-8 items-center text-sm font-semibold">
+                    <a href="index.html" class="text-slate-600 hover:text-blue-600 transition">Home</a>
+                    <a href="index.html#how-it-works" class="text-slate-600 hover:text-blue-600 transition">How it Works</a>
+                    <a href="login.html" class="text-slate-600 hover:text-blue-600 transition">About & FAQ</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="login.html" class="text-blue-600 font-bold text-sm hover:text-blue-500 transition">Login</a>
+                    <a href="#" class="bg-blue-600 text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition">Get Started</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+        <!-- Logo -->
+        <div class="text-center">
+            <a href="index.html" class="text-3xl font-bold tracking-tight text-white">Smart<span class="text-blue-600">Earn</span></a>
+            <h2 class="mt-6 text-2xl font-extrabold text-white">Create your account</h2>
+            <p class="mt-2 text-sm text-slate-400">
+                Already have an account? <a href="login.html" class="font-medium text-blue-600 hover:text-blue-500">Sign in here</a>
+            </p> 
+        </div>
+    </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div class="bg-white/5 py-8 px-4 shadow-2xl backdrop-blur-xl sm:rounded-2xl sm:px-10 border border-white/10">
+            <!-- Referrer Info -->
+            <div id="referrer-info" class="mb-6 p-4 bg-blue-600/10 border border-blue-600/20 rounded-xl hidden text-center">
+                <!-- Injected via JS -->
+            </div>
+
+            <!-- Divider -->
+            <div class="mt-6 relative">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-white/5"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-2 bg-[#020617] text-slate-500">Or register with details</span>
+                </div>
+            </div>
+
+            <!-- Manual Form -->
+            <form id="registration-form" class="mt-6 space-y-6">
+                <div>
+                    <label for="fullName" class="block text-sm font-medium text-slate-300">FULL NAME</label>
+                    <div class="mt-1">
+                        <input id="fullName" name="fullName" type="text" required class="appearance-none block w-full px-3 py-3 border border-white/10 rounded-lg bg-white/5 shadow-sm placeholder-slate-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm text-white">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="username" class="block text-sm font-medium text-slate-300">USERNAME</label>
+                    <div class="mt-1">
+                        <input id="username" name="username" type="text" required placeholder="johndoe123" class="appearance-none block w-full px-3 py-3 border border-white/10 rounded-lg bg-white/5 shadow-sm placeholder-slate-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm text-white">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="email" class="block text-sm font-medium text-slate-300">EMAIL ADDRESS</label>
+                    <div class="mt-1">
+                        <input id="email" name="email" type="email" required class="appearance-none block w-full px-3 py-3 border border-white/10 rounded-lg bg-white/5 shadow-sm placeholder-slate-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm text-white">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="phone" class="block text-sm font-medium text-slate-300">PHONE NUMBER</label>
+                    <div class="mt-1">
+                        <input id="phoneNumber" name="phoneNumber" type="tel" value="+254" placeholder="+2547xxxxxxxx" class="appearance-none block w-full px-3 py-3 border border-white/10 rounded-lg bg-white/5 shadow-sm placeholder-slate-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm text-white">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-medium text-slate-300">PASSWORD</label>
+                    <div class="mt-1 relative">
+                        <input id="password" name="password" type="password" required class="appearance-none block w-full px-3 py-3 pr-10 border border-white/10 rounded-lg bg-white/5 shadow-sm placeholder-slate-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm text-white">
+                        <button type="button" class="absolute right-3 top-3 text-slate-500 hover:text-slate-300 focus:outline-none" onclick="togglePasswordVisibility('password', this)">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <p class="mt-1 text-[10px] text-slate-500 font-medium">Password must contain 8+ characters, uppercase, lowercase, numbers, and symbols.</p>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="confirm-password" class="block text-sm font-medium text-slate-300">CONFIRM PASSWORD</label>
+                    <div class="mt-1 relative">
+                        <input id="confirmPassword" name="confirmPassword" type="password" required class="appearance-none block w-full px-3 py-3 pr-10 border border-white/10 rounded-lg bg-white/5 shadow-sm placeholder-slate-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm text-white">
+                        <button type="button" class="absolute right-3 top-3 text-slate-500 hover:text-slate-300 focus:outline-none" onclick="togglePasswordVisibility('confirmPassword', this)">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition shadow-lg shadow-blue-200">
+                        Create Account
+                    </button>
+                </div>
+            </form>
+
+            <!-- Social Login -->
+            <div class="mt-6">
+                <a href="#" class="w-full flex items-center justify-center space-x-3 bg-white/5 border border-white/10 py-3 rounded-xl font-bold text-sm hover:bg-white/10 transition text-slate-300">
+                    <img src="https://www.svgrepo.com/show/355037/google.svg" class="w-5 h-5" alt="Google">
+                    <span>Continue with Google</span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Safety Note -->
+        <p class="mt-8 text-center text-xs text-slate-400">
+            Secure login protected by TLS 1.3 encryption. <br>
+            By signing in, you agree to our Terms of Service.
+        </p>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:5000';
+
+        // Fetch and display referrer username on page load
+        window.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const ref = urlParams.get('ref');
+            
+            if (ref) {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/auth/referrer-info?ref=${ref}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        const refDiv = document.getElementById('referrer-info');
+                        refDiv.innerHTML = `<p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">You were invited by</p>
+                                           <p class="text-blue-500 font-bold text-lg">${data.username}</p>`;
+                        refDiv.classList.remove('hidden');
+                    }
+                } catch (error) {
+                    console.error('Error fetching referrer info:', error);
+                }
+            }
+        });
+
+        function togglePasswordVisibility(id, btn) {
+            const input = document.getElementById(id);
+            const icon = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        document.getElementById('registration-form').addEventListener('submit', async (e) => {
+            e.preventDefault(); // Prevent default form submission
+
+            const fullName = document.getElementById('fullName').value;
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            // Remove any non-digit characters (like '+') to ensure 254... format
+            const phoneNumber = document.getElementById('phoneNumber').value.replace(/\D/g, '');
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (password !== confirmPassword) {
+                alert('Passwords do not match!');
+                return;
+            }
+
+            // Password complexity validation
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
+            if (!passwordRegex.test(password)) {
+                alert('Password must be at least 8 characters long and include uppercase, lowercase, numbers, and symbols.');
+                return;
+            }
+
+            // Capture referral code from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const referredBy = urlParams.get('ref');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        fullName,
+                        username,
+                        email,
+                        password,
+                        phoneNumber,
+                        referredBy
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('registeredName', fullName);
+                    localStorage.setItem('registeredPhone', phoneNumber);
+                    window.location.href = 'payments.html'; 
+                } else {
+                    alert(data.message || 'Registration failed');
+                }
+            } catch (error) {
+                console.error('Error during registration:', error);
+                alert('Registration Error: ' + error.message);
+            }
+        });
+    </script>
+
+</body>
+</html>

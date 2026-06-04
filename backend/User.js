@@ -1,0 +1,1 @@
+// Deprecated: Moved to models/User.js

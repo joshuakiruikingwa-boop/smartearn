@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | SmartEarn</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-[#020617] h-screen flex items-center justify-center p-6 text-slate-300">
+
+    <!-- Animated Balloon Background -->
+    <canvas id="balloon-canvas" class="fixed inset-0 z-[-1] pointer-events-none"></canvas>
+
+    <div class="w-full max-w-md">
+        <div class="text-center mb-8">
+            <a href="index.html" class="text-3xl font-black tracking-tighter text-blue-600 mb-2 inline-block">SMARTEARN.</a>
+            <p class="text-slate-400 font-medium">Join us today and start your earning journey.</p>
+        </div>
+
+        <div class="bg-white/5 p-8 rounded-3xl border border-white/10 shadow-2xl backdrop-blur-xl">
+            <!-- Referrer Info (Shown if ref link is used) -->
+            <div id="referrer-info" class="mb-6 p-4 bg-blue-600/10 border border-blue-600/20 rounded-2xl hidden text-center animate-pulse">
+                <!-- Injected via JS -->
+            </div>
+
+            <form id="registration-form" class="space-y-4">
+                <div>
+                    <label for="fullname" class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Full Name</label>
+                    <input id="fullname" type="text" required placeholder="John Doe" class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition text-white placeholder-slate-600">
+                </div>
+                <div>
+                    <label for="username" class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Username</label>
+                    <input id="username" type="text" required placeholder="johndoe123" class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition text-white placeholder-slate-600">
+                </div>
+                <div>
+                    <label for="email" class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Email Address</label>
+                    <input id="email" type="email" required placeholder="name@company.com" class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition text-white placeholder-slate-600">
+                </div>
+                <div>
+                    <label for="phone" class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Phone Number</label>
+                    <input id="phone" type="tel" required value="+254" placeholder="+254..." class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition text-white placeholder-slate-600">
+                </div>
+                <div>
+                    <label for="password" class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Password</label>
+                    <div class="relative">
+                        <input id="password" type="password" required placeholder="••••••••" class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition text-white placeholder-slate-600 pr-10">
+                        <button type="button" id="toggle-password" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <label for="confirm-password" class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Confirm Password</label>
+                    <div class="relative">
+                        <input id="confirm-password" type="password" required placeholder="••••••••" class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition text-white placeholder-slate-600 pr-10">
+                        <button type="button" id="toggle-confirm-password" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 transition">Create Account</button>
+            </form>
+            
+            <div class="mt-6 text-center text-sm">
+                <p class="text-slate-500">Already have an account? <a href="login.html" class="text-blue-500 hover:underline">Sign In</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fetch and display referrer username on page load
+        window.addEventListener('DOMContentLoaded', async () => {
+            const ref = new URLSearchParams(window.location.search).get('ref');
+            
+            if (ref) {
+                const refDiv = document.getElementById('referrer-info');
+                refDiv.classList.remove('hidden');
+                refDiv.innerHTML = `<p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Validating invitation...</p>`;
+                
+                try {
+                    const response = await fetch(`/api/auth/referrer-info?ref=${ref}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        refDiv.classList.remove('animate-pulse');
+                        refDiv.innerHTML = `<p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">You were invited by</p>
+                                           <p class="text-blue-500 font-bold text-lg">${data.username}</p>`;
+                    } else {
+                        refDiv.classList.add('hidden');
+                    }
+                } catch (error) {
+                    console.error('Error fetching referrer info:', error);
+                }
+            }
+        });
+
+        document.getElementById('registration-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const attemptsKey = 'reg_attempts';
+            const lockoutKey = 'reg_lockout';
+            const now = Date.now();
+            const lockoutUntil = parseInt(localStorage.getItem(lockoutKey) || '0');
+
+            if (lockoutUntil && now < lockoutUntil) {
+                const minutesLeft = Math.ceil((lockoutUntil - now) / 1000 / 60);
+                alert(`Too many attempts. Please try again in ${minutesLeft} minutes.`);
+                return;
+            }
+
+            const fullName = document.getElementById('fullname').value;
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const phoneNumber = document.getElementById('phone').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            if (!phoneNumber.startsWith('+254')) {
+                alert('Phone number must start with +254');
+                return;
+            }
+
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
+            if (!passwordRegex.test(password)) {
+                alert('Password must be at least 8 characters long and contain uppercase, lowercase, numbers, and symbols.');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                alert('Passwords do not match!');
+                return;
+            }
+
+            // Capture referral code from URL parameters (e.g., ?ref=JD7721)
+            const urlParams = new URLSearchParams(window.location.search);
+            const referredBy = urlParams.get('ref');
+
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ fullName, username, email, phoneNumber, password, referredBy }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    localStorage.removeItem(attemptsKey);
+                    localStorage.removeItem(lockoutKey);
+                    alert('Registration successful! Redirecting to login...');
+                    window.location.href = 'login.html';
+                } else {
+                    let attempts = parseInt(localStorage.getItem(attemptsKey) || '0') + 1;
+                    localStorage.setItem(attemptsKey, attempts);
+                    
+                    if (attempts >= 5) {
+                        localStorage.setItem(lockoutKey, now + (15 * 60 * 1000));
+                        alert('Too many registration attempts. You are locked out for 15 minutes.');
+                    } else {
+                        alert(data.message || 'Registration failed. Please try again.');
+                    }
+                }
+            } catch (error) {
+                console.error('Error during registration:', error);
+                alert('An error occurred. Please check your connection and try again.');
+            }
+        });
+
+        // Show/Hide Password functionality
+        const togglePassword = document.getElementById('toggle-password');
+        const passwordInput = document.getElementById('password');
+
+        togglePassword.addEventListener('click', function () {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            // Toggle the eye icon
+            this.querySelector('i').classList.toggle('fa-eye');
+            this.querySelector('i').classList.toggle('fa-eye-slash');
+            if (type === 'text') {
+                passwordInput.focus(); // Keep focus on the input field
+            }
+        });
+
+        // Show/Hide Confirm Password functionality
+        const toggleConfirmPassword = document.getElementById('toggle-confirm-password');
+        const confirmPasswordInput = document.getElementById('confirm-password');
+
+        toggleConfirmPassword.addEventListener('click', function () {
+            const type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            confirmPasswordInput.setAttribute('type', type);
+            // Toggle the eye icon
+            this.querySelector('i').classList.toggle('fa-eye');
+            this.querySelector('i').classList.toggle('fa-eye-slash');
+            if (type === 'text') {
+                confirmPasswordInput.focus(); // Keep focus on the input field
+            }
+        });
+
+        // Balloon Background Logic
+        const canvas = document.getElementById('balloon-canvas');
+        const ctx = canvas.getContext('2d');
+        let balloons = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Balloon {
+            constructor() {
+                this.radius = 25; // 50px diameter
+                this.x = Math.random() * (canvas.width - this.radius * 2) + this.radius;
+                this.y = Math.random() * (canvas.height - this.radius * 2) + this.radius;
+                this.dx = (Math.random() - 0.5) * 2; // Random velocity X
+                this.dy = (Math.random() - 0.5) * 2; // Random velocity Y
+                this.color = `hsla(${Math.random() * 360}, 70%, 60%, 0.3)`;
+            }
+
+            draw() {
+                ctx.beginPath();
+                // Draw the balloon body
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                
+                // Draw the highlight/shine for a 3D effect
+                ctx.beginPath();
+                ctx.arc(this.x - this.radius/3, this.y - this.radius/3, this.radius/4, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+                ctx.fill();
+
+                // Draw the small triangle at the bottom
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y + this.radius);
+                ctx.lineTo(this.x - 5, this.y + this.radius + 10);
+                ctx.lineTo(this.x + 5, this.y + this.radius + 10);
+                ctx.closePath();
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+
+            update(others) {
+                // Collision detection with edges
+                if (this.x + this.radius > canvas.width || this.x - this.radius < 0) {
+                    this.dx = -this.dx;
+                }
+                if (this.y + this.radius > canvas.height || this.y - this.radius < 0) {
+                    this.dy = -this.dy;
+                }
+
+                // Collision detection with other balloons
+                for (let other of others) {
+                    if (this === other) continue;
+                    const dx = other.x - this.x;
+                    const dy = other.y - this.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < this.radius + other.radius) {
+                        // Simple elastic collision (velocity swap)
+                        const tempDx = this.dx;
+                        const tempDy = this.dy;
+                        this.dx = other.dx;
+                        this.dy = other.dy;
+                        other.dx = tempDx;
+                        other.dy = tempDy;
+
+                        // Prevent balloons from sticking together by resolving overlap
+                        const overlap = (this.radius + other.radius - distance) / 2;
+                        this.x -= (dx / distance) * overlap;
+                        this.y -= (dy / distance) * overlap;
+                    }
+                }
+
+                this.x += this.dx;
+                this.y += this.dy;
+
+                this.draw();
+            }
+        }
+
+        function initBalloons() {
+            balloons = [];
+            for (let i = 0; i < 50; i++) {
+                balloons.push(new Balloon());
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            balloons.forEach(balloon => balloon.update(balloons));
+            requestAnimationFrame(animate);
+        }
+
+        initBalloons();
+        animate();
+    </script>
+</body>
+</html>
