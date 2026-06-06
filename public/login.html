@@ -34,8 +34,52 @@
         </div>
     </div>
 
+    <!-- Alert/Message Interface -->
+    <div id="message-container" class="fixed bottom-8 right-8 z-[100] transform translate-x-[120%] opacity-0 transition-all duration-700 pointer-events-none">
+        <div class="bg-emerald-600/10 backdrop-blur-2xl border border-emerald-500/30 p-6 rounded-[2rem] shadow-2xl shadow-emerald-900/20 flex items-center space-x-4 min-w-[320px] max-w-md">
+            <div class="w-12 h-12 bg-emerald-500/20 text-emerald-500 rounded-2xl flex items-center justify-center text-xl border border-emerald-500/20">
+                <i id="msg-icon" class="fas fa-check-circle"></i>
+            </div>
+            <div class="flex-1">
+                <p id="msg-label" class="text-emerald-500 text-[10px] font-black uppercase tracking-[0.2em] mb-1">System Notification</p>
+                <p id="msg-content" class="text-white font-bold text-sm leading-relaxed">Operation completed successfully.</p>
+            </div>
+            <button onclick="hideMessage()" class="text-emerald-500/50 hover:text-white transition pointer-events-auto">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
     <script>
         const API_BASE_URL = 'http://localhost:5000';
+
+        /**
+         * Displays a notification message to the user.
+         * @param {string} text - The message body
+         * @param {string} type - 'success' or 'error' (affects the label and icon)
+         */
+        function showMessage(text, type = 'success') {
+            const container = document.getElementById('message-container');
+            const content = document.getElementById('msg-content');
+            const label = document.getElementById('msg-label');
+            const icon = document.getElementById('msg-icon');
+
+            content.innerText = text;
+            label.innerText = type === 'error' ? 'System Alert' : 'System Notification';
+            icon.className = type === 'error' ? 'fas fa-exclamation-triangle' : 'fas fa-check-circle';
+            
+            container.classList.remove('translate-x-[120%]', 'opacity-0');
+            container.classList.add('translate-x-0', 'opacity-100');
+
+            // Auto-hide after 6 seconds
+            setTimeout(hideMessage, 6000);
+        }
+
+        function hideMessage() {
+            const container = document.getElementById('message-container');
+            container.classList.add('translate-x-[120%]', 'opacity-0');
+            container.classList.remove('translate-x-0', 'opacity-100');
+        }
 
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -47,7 +91,7 @@
 
             if (lockoutUntil && now < lockoutUntil) {
                 const minutesLeft = Math.ceil((lockoutUntil - now) / 1000 / 60);
-                alert(`Too many failed attempts. Please try again in ${minutesLeft} minutes.`);
+                showMessage(`Too many failed attempts. Please try again in ${minutesLeft} minutes.`, 'error');
                 return;
             }
 
@@ -92,14 +136,14 @@
                     
                     if (attempts >= 5) {
                         localStorage.setItem(lockoutKey, now + (15 * 60 * 1000));
-                        alert('Too many failed attempts. You are locked out for 15 minutes.');
+                        showMessage('Too many failed attempts. You are locked out for 15 minutes.', 'error');
                     } else {
-                        alert(data.message || 'Login failed. Please check your details.');
+                        showMessage(data.message || 'Login failed. Please check your details.', 'error');
                     }
                 }
             } catch (error) {
                 console.error('Error during login:', error);
-                alert('An error occurred. Please check your connection and try again.');
+                showMessage('An error occurred. Please check your connection and try again.', 'error');
             }
         });
 
