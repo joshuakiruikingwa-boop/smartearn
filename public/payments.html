@@ -125,7 +125,7 @@
             window.location.href = 'login.html';
         }
 
-        const API_BASE_URL = w.location.hostname}:5000`;
+        const API_BASE_URL = window.location.origin;
 
         // Welcoming message with registered name
         const registeredName = localStorage.getItem('registeredName') || 'Valued Member';
