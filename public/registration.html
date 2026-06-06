@@ -19,7 +19,7 @@
                 <div class="hidden md:flex space-x-8 items-center text-sm font-semibold">
                     <a href="index.html" class="text-slate-600 hover:text-blue-600 transition">Home</a>
                     <a href="index.html#how-it-works" class="text-slate-600 hover:text-blue-600 transition">How it Works</a>
-                    <a href="login.html" class="text-slate-600 hover:text-blue-600 transition">About & FAQ</a>
+                    <a href="index.html#faq" class="text-slate-600 hover:text-blue-600 transition">About & FAQ</a>
                 </div>
                 <div class="flex items-center space-x-4">
                     <a href="login.html" class="text-blue-600 font-bold text-sm hover:text-blue-500 transition">Login</a>
@@ -112,7 +112,7 @@
 
                 <div>
                     <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition shadow-lg shadow-blue-200">
-                        Create Account
+                        <span id="submit-text">Create Account</span>
                     </button>
                 </div>
             </form>
@@ -134,8 +134,8 @@
     </div>
 
     <!-- Alert/Message Interface -->
-    <div id="message-container" class="fixed bottom-8 right-8 z-[100] transform translate-x-[120%] opacity-0 transition-all duration-700 pointer-events-none">
-        <div class="bg-emerald-600/10 backdrop-blur-2xl border border-emerald-500/30 p-6 rounded-[2rem] shadow-2xl shadow-emerald-900/20 flex items-center space-x-4 min-w-[320px] max-w-md">
+    <div id="message-container" class="fixed bottom-8 right-4 sm:right-8 z-[100] transform translate-x-[120%] opacity-0 transition-all duration-700 pointer-events-none">
+        <div class="bg-emerald-600/10 backdrop-blur-2xl border border-emerald-500/30 p-6 rounded-[2rem] shadow-2xl shadow-emerald-900/20 flex items-center space-x-4 w-[calc(100vw-2rem)] sm:min-w-[320px] max-w-md">
             <div class="w-12 h-12 bg-emerald-500/20 text-emerald-500 rounded-2xl flex items-center justify-center text-xl border border-emerald-500/20">
                 <i id="msg-icon" class="fas fa-check-circle"></i>
             </div>
@@ -150,7 +150,10 @@
     </div>
 
     <script>
-        const API_BASE_URL = 'http://localhost:5000';
+        // Dynamic API URL: Uses current hostname to allow mobile access on local network
+        const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? 'http://localhost:5000' 
+            : `http://${window.location.hostname}:5000`;
 
         function showMessage(text, type = 'success') {
             const container = document.getElementById('message-container');
@@ -167,8 +170,8 @@
             label.innerText = isError ? 'System Alert' : 'System Notification';
             label.className = `${isError ? 'text-rose-500' : 'text-emerald-500'} text-[10px] font-black uppercase tracking-[0.2em] mb-1`;
             icon.className = isError ? 'fas fa-exclamation-triangle' : 'fas fa-check-circle';
-            inner.className = `bg-${isError ? 'rose' : 'emerald'}-600/10 backdrop-blur-2xl border border-${isError ? 'rose' : 'emerald'}-500/30 p-6 rounded-[2rem] shadow-2xl shadow-${isError ? 'rose' : 'emerald'}-900/20 flex items-center space-x-4 min-w-[320px] max-w-md`;
-            iconWrapper.className = `w-12 h-12 bg-${isError ? 'rose' : 'emerald'}-500/20 text-${isError ? 'rose' : 'emerald'}-500 rounded-2xl flex items-center justify-center text-xl border border-${isError ? 'rose' : 'emerald'}-500/20`;
+            inner.className = `bg-${isError ? 'rose' : 'emerald'}-600/10 backdrop-blur-2xl border border-${isError ? 'rose' : 'emerald'}-500/30 p-6 rounded-[2rem] shadow-2xl shadow-${isError ? 'rose' : 'emerald'}-900/20 flex items-center space-x-4 w-[calc(100vw-2rem)] sm:min-w-[320px] max-w-md`;
+            iconWrapper.className = `w-10 h-10 sm:w-12 sm:h-12 bg-${isError ? 'rose' : 'emerald'}-500/20 text-${isError ? 'rose' : 'emerald'}-500 rounded-2xl flex items-center justify-center text-xl border border-${isError ? 'rose' : 'emerald'}-500/20 flex-shrink-0`;
             closeBtn.className = `text-${isError ? 'rose' : 'emerald'}-500/50 hover:text-white transition pointer-events-auto`;
             
             container.classList.remove('translate-x-[120%]', 'opacity-0');
@@ -220,6 +223,10 @@
         document.getElementById('registration-form').addEventListener('submit', async (e) => {
             e.preventDefault(); // Prevent default form submission
 
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const submitText = document.getElementById('submit-text');
+            const originalText = submitText.innerText;
+
             const fullName = document.getElementById('fullName').value;
             const username = document.getElementById('username').value;
             const email = document.getElementById('email').value;
@@ -245,6 +252,10 @@
             const referredBy = urlParams.get('ref');
 
             try {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-70', 'cursor-not-allowed');
+                submitText.innerText = 'Creating Account...';
+
                 const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
                     method: 'POST',
                     headers: {
@@ -260,7 +271,14 @@
                     }),
                 });
 
-                const data = await response.json();
+                let data;
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    data = await response.json();
+                } else {
+                    const text = await response.text();
+                    throw new Error("Server communication failed.");
+                }
 
                 if (response.ok) {
                     localStorage.setItem('token', data.token);
@@ -272,7 +290,11 @@
                 }
             } catch (error) {
                 console.error('Error during registration:', error);
-                showMessage('An error occurred during registration.', 'error');
+                showMessage(error.message || 'An error occurred during registration.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+                submitText.innerText = originalText;
             }
         });
     </script>
