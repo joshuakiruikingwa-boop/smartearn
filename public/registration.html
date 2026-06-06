@@ -150,8 +150,11 @@
     </div>
 
     <script>
-        // Dynamic API URL: Uses current hostname and protocol to allow mobile access on local network
-        const API_BASE_URL = window.location.origin;
+        // Robust API URL detection for Local Dev vs Production
+        const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
+        const API_BASE_URL = isDevelopment && (window.location.port !== '5000')
+            ? `${window.location.protocol}//${window.location.hostname}:5000`
+            : window.location.origin;
 
         function showMessage(text, type = 'success') {
             const container = document.getElementById('message-container');
@@ -274,8 +277,9 @@
                 if (contentType && contentType.indexOf("application/json") !== -1) {
                     data = await response.json();
                 } else {
-                    const text = await response.text();
-                    throw new Error(`Server communication failed (Status: ${response.status}).`);
+                    const errorText = await response.text();
+                    console.error("Server returned non-JSON:", errorText);
+                    throw new Error(`Server returned error ${response.status}. Check console for details.`);
                 }
 
                 if (response.ok) {
