@@ -52,9 +52,16 @@
     </div>
 
     <script>
-        const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const API_BASE_URL = isLocalhost 
             ? 'http://localhost:5000' 
-            : `http://${window.location.hostname}:5000`;
+            : `${window.location.protocol}//${window.location.hostname}:5000`;
+
+        function hideMessage() {
+            const container = document.getElementById('message-container');
+            container.classList.add('translate-x-[120%]', 'opacity-0');
+            container.classList.remove('translate-x-0', 'opacity-100');
+        }
 
         /**
          * Displays a notification message to the user.
@@ -63,18 +70,25 @@
          */
         function showMessage(text, type = 'success') {
             const container = document.getElementById('message-container');
+            const inner = container.querySelector('div');
+            const iconWrapper = inner.querySelector('div');
             const content = document.getElementById('msg-content');
             const label = document.getElementById('msg-label');
             const icon = document.getElementById('msg-icon');
+            const closeBtn = inner.querySelector('button');
 
             content.innerText = text;
-            label.innerText = type === 'error' ? 'System Alert' : 'System Notification';
-            icon.className = type === 'error' ? 'fas fa-exclamation-triangle' : 'fas fa-check-circle';
+            const isError = type === 'error';
+            
+            label.innerText = isError ? 'System Alert' : 'System Notification';
+            label.className = `${isError ? 'text-rose-500' : 'text-emerald-500'} text-[10px] font-black uppercase tracking-[0.2em] mb-1`;
+            icon.className = isError ? 'fas fa-exclamation-triangle' : 'fas fa-check-circle';
+            inner.className = `bg-${isError ? 'rose' : 'emerald'}-600/10 backdrop-blur-2xl border border-${isError ? 'rose' : 'emerald'}-500/30 p-6 rounded-[2rem] shadow-2xl shadow-${isError ? 'rose' : 'emerald'}-900/20 flex items-center space-x-4 w-[calc(100vw-2rem)] sm:min-w-[320px] max-w-md`;
+            iconWrapper.className = `w-10 h-10 sm:w-12 sm:h-12 bg-${isError ? 'rose' : 'emerald'}-500/20 text-${isError ? 'rose' : 'emerald'}-500 rounded-2xl flex items-center justify-center text-xl border border-${isError ? 'rose' : 'emerald'}-500/20 flex-shrink-0`;
+            if (closeBtn) closeBtn.className = `text-${isError ? 'rose' : 'emerald'}-500/50 hover:text-white transition pointer-events-auto`;
             
             container.classList.remove('translate-x-[120%]', 'opacity-0');
             container.classList.add('translate-x-0', 'opacity-100');
-
-            // Auto-hide after 6 seconds
             setTimeout(hideMessage, 6000);
         }
 
@@ -146,7 +160,11 @@
                 }
             } catch (error) {
                 console.error('Error during login:', error);
-                showMessage('An error occurred. Please check your connection and try again.', 'error');
+                if (error.message === 'Failed to fetch') {
+                    showMessage('Network Error: Server unreachable. Check firewall and network settings.', 'error');
+                } else {
+                    showMessage('An error occurred. Please check your connection and try again.', 'error');
+                }
             }
         });
 

@@ -150,10 +150,11 @@
     </div>
 
     <script>
-        // Dynamic API URL: Uses current hostname to allow mobile access on local network
-        const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+        // Dynamic API URL: Uses current hostname and protocol to allow mobile access on local network
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const API_BASE_URL = isLocalhost 
             ? 'http://localhost:5000' 
-            : `http://${window.location.hostname}:5000`;
+            : `${window.location.protocol}//${window.location.hostname}:5000`;
 
         function showMessage(text, type = 'success') {
             const container = document.getElementById('message-container');
@@ -282,6 +283,7 @@
 
                 if (response.ok) {
                     localStorage.setItem('token', data.token);
+                    localStorage.setItem('userId', data.userId);
                     localStorage.setItem('registeredName', fullName);
                     localStorage.setItem('registeredPhone', phoneNumber);
                     window.location.href = 'payments.html'; 
@@ -290,7 +292,11 @@
                 }
             } catch (error) {
                 console.error('Error during registration:', error);
-                showMessage(error.message || 'An error occurred during registration.', 'error');
+                if (error.message === 'Failed to fetch') {
+                    showMessage('Network Error: Unable to connect to the server. Check your firewall or if the server is listening on 0.0.0.0.', 'error');
+                } else {
+                    showMessage(error.message || 'An error occurred during registration.', 'error');
+                }
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.classList.remove('opacity-70', 'cursor-not-allowed');
