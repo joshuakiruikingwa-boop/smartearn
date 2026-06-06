@@ -52,10 +52,9 @@
     </div>
 
     <script>
-        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        const API_BASE_URL = isLocalhost 
-            ? 'http://localhost:5000' 
-            : `${window.location.protocol}//${window.location.hostname}:5000`;
+        const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+            ? 'http://localhost:5000'
+            : `http://${window.location.hostname}:5000`;
 
         function hideMessage() {
             const container = document.getElementById('message-container');
@@ -161,7 +160,7 @@
             } catch (error) {
                 console.error('Error during login:', error);
                 if (error.message === 'Failed to fetch') {
-                    showMessage('Network Error: Server unreachable. Check firewall and network settings.', 'error');
+                    showMessage(`Connection failed to ${API_BASE_URL}. Check backend binding and firewall.`, 'error');
                 } else {
                     showMessage('An error occurred. Please check your connection and try again.', 'error');
                 }

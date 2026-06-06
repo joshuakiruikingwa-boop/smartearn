@@ -151,10 +151,9 @@
 
     <script>
         // Dynamic API URL: Uses current hostname and protocol to allow mobile access on local network
-        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        const API_BASE_URL = isLocalhost 
-            ? 'http://localhost:5000' 
-            : `${window.location.protocol}//${window.location.hostname}:5000`;
+        const API_BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+            ? 'http://localhost:5000'
+            : `http://${window.location.hostname}:5000`;
 
         function showMessage(text, type = 'success') {
             const container = document.getElementById('message-container');
@@ -293,7 +292,7 @@
             } catch (error) {
                 console.error('Error during registration:', error);
                 if (error.message === 'Failed to fetch') {
-                    showMessage('Network Error: Unable to connect to the server. Check your firewall or if the server is listening on 0.0.0.0.', 'error');
+                    showMessage(`Connection failed to ${API_BASE_URL}. Check if backend is running on 0.0.0.0 and firewall port 5000 is open.`, 'error');
                 } else {
                     showMessage(error.message || 'An error occurred during registration.', 'error');
                 }
