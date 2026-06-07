@@ -193,7 +193,7 @@
             
             if (ref) {
                 try {
-                    const response = await fetch(`${API_BASE_URL}/api/referrer-info?ref=${ref}`);
+                    const response = await fetch(`${API_BASE_URL}/api/auth/referrer-info?ref=${ref}`);
                     if (response.ok) {
                         const data = await response.json();
                         const refDiv = document.getElementById('referrer-info');
@@ -257,7 +257,7 @@
                 submitBtn.classList.add('opacity-70', 'cursor-not-allowed');
                 submitText.innerText = 'Creating Account...';
 
-                const response = await fetch(`${API_BASE_URL}/api/register`, {
+                const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
