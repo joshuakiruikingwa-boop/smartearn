@@ -39,7 +39,11 @@
 </div>
 
 <script>
-    const API_BASE_URL = 'http://localhost:5000';
+    // Robust API URL detection for Local Dev vs Production
+    const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
+    const API_BASE_URL = isDevelopment && (window.location.port !== '5000')
+        ? `${window.location.protocol}//${window.location.hostname}:5000`
+        : window.location.origin;
     const form = document.getElementById('adminLoginForm');
     const msgDiv = document.getElementById('msg');
 

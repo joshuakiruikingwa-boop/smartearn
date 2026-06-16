@@ -239,6 +239,11 @@
     overlay.addEventListener('click', toggleSidebar);
 
     // Sidebar User Data Loading
+    const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
+    const API_BASE_URL = isDevelopment && (window.location.port !== '5000')
+        ? `${window.location.protocol}//${window.location.hostname}:5000`
+        : window.location.origin;
+
     async function loadSidebarData() {
         const token = localStorage.getItem('token');
         if (!token) return;
@@ -264,41 +269,65 @@
     const timerDisplay = document.getElementById('cooldown-timer');
 
     // Segments match backend: 0:50.00, 1:5.00, 2:25.00, 3:8.00, 4:40.00, 5:0, 6:15.00, 7:10.00
-    const REWARDS = ["Ksh 50.00", "Ksh 5.00", "Ksh 25.00", "Ksh 8.00", "Ksh 40.00", "Try Again", "Ksh 15.00", "Ksh 10.00"];
+    let REWARDS = ["Ksh 50.00", "Ksh 5.00", "Ksh 25.00", "Ksh 8.00", "Ksh 40.00", "Try Again", "Ksh 15.00", "Ksh 10.00"];
+    let REWARD_VALUES = [50, 5, 25, 8, 40, 0, 15, 10];
     const COOLDOWN_TIME = 24 * 60 * 60 * 1000; // 24 hours in ms
 
-    // Initialize wheel labels
-    REWARDS.forEach((reward, i) => {
-        const label = document.createElement('div');
-        label.className = 'segment-label';
-        label.innerText = reward;
-        // Center text in segment: (i * 45deg) + 22.5deg offset from top (-90deg initial div orientation)
-        const rotation = (i * 45) + 22.5 - 90;
-        label.style.transform = `rotate(${rotation}deg)`;
-        wheel.appendChild(label);
-    });
+    async function fetchSpinConfig() {
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/tasks/spin-config`, {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
+            const data = await res.json();
+            if (data.success && data.config) {
+                REWARDS = data.config.labels;
+                REWARD_VALUES = data.config.values;
+            }
+        } catch (err) {
+            console.error("Config load error:", err);
+        } finally {
+            initializeWheel();
+            updateTimer();
+        }
+    }
+
+    function initializeWheel() {
+        wheel.innerHTML = '';
+        REWARDS.forEach((reward, i) => {
+            const label = document.createElement('div');
+            label.className = 'segment-label';
+            label.innerText = reward;
+            const rotation = (i * 45) + 22.5 - 90;
+            label.style.transform = `rotate(${rotation}deg)`;
+            wheel.appendChild(label);
+        });
+    }
 
     function updateTimer(serverWaitTime = null) {
-        if (serverWaitTime) localStorage.setItem('lastSpin', Date.now() - (COOLDOWN_TIME - serverWaitTime));
-        
-        const lastSpin = localStorage.getItem('lastSpin');
-        if (!lastSpin) return;
-
-        const now = Date.now();
-        const timePassed = now - parseInt(lastSpin);
-
-        if (timePassed < COOLDOWN_TIME) {
-            const remaining = COOLDOWN_TIME - timePassed;
-            const hours = Math.floor(remaining / (1000 * 60 * 60));
-            const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
-
-            timerDisplay.innerText = `Next spin in: ${hours}h ${minutes}m ${seconds}s`;
-            spinBtn.disabled = true;
-            setTimeout(updateTimer, 1000);
+        if (COOLDOWN_TIME === 0) {
+            timerDisplay.innerText = ""; // Clear any timer text
+            spinBtn.disabled = false; // Always enable the button
         } else {
-            timerDisplay.innerText = "";
-            spinBtn.disabled = false;
+            if (serverWaitTime) localStorage.setItem('lastSpin', Date.now() - (COOLDOWN_TIME - serverWaitTime));
+            
+            const lastSpin = localStorage.getItem('lastSpin');
+            if (!lastSpin) return;
+
+            const now = Date.now();
+            const timePassed = now - parseInt(lastSpin);
+
+            if (timePassed < COOLDOWN_TIME) {
+                const remaining = COOLDOWN_TIME - timePassed;
+                const hours = Math.floor(remaining / (1000 * 60 * 60));
+                const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+                timerDisplay.innerText = `Next spin in: ${hours}h ${minutes}m ${seconds}s`;
+                spinBtn.disabled = true;
+                setTimeout(updateTimer, 1000);
+            } else {
+                timerDisplay.innerText = "";
+                spinBtn.disabled = false;
+            }
         }
     }
 
@@ -307,7 +336,7 @@
         resultDisplay.innerText = "Requesting Spin...";
         
         try {
-            const response = await fetch('/api/tasks/spin', {
+            const response = await fetch(`${API_BASE_URL}/api/tasks/spin`, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -331,10 +360,33 @@
             wheel.style.transform = `rotate(${targetDegree}deg)`;
             resultDisplay.innerText = "Good Luck!";
 
-            setTimeout(() => {
-                resultDisplay.innerText = data.message;
+            setTimeout(async () => {
+                resultDisplay.innerText = `You won ${REWARDS[data.prizeIndex]}!`;
                 localStorage.setItem('lastSpin', Date.now().toString());
                 updateTimer();
+
+                // Trigger the actual claim in the database
+                const rewardAmount = REWARD_VALUES[data.prizeIndex];
+                if (rewardAmount > 0) {
+                    try {
+                        const claimRes = await fetch(`${API_BASE_URL}/api/tasks/complete`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${localStorage.getItem('token')}`
+                            },
+                            body: JSON.stringify({
+                                taskType: 'spin',
+                                taskId: data.prizeIndex, 
+                                rewardAmount: rewardAmount
+                            })
+                        });
+                        
+                        if (claimRes.ok) loadSidebarData(); // Refresh the sidebar balance immediately
+                    } catch (err) {
+                        console.error("Claiming error:", err);
+                    }
+                }
             }, 3000);
 
         } catch (error) {
@@ -343,8 +395,8 @@
         }
     });
 
-    // Initial check on load
-    updateTimer();
+    // Load dynamic config and initialize
+    fetchSpinConfig();
 
     // Balloon Background Logic
     const canvas = document.getElementById('balloon-canvas');

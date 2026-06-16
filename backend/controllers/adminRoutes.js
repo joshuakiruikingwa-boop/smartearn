@@ -97,8 +97,8 @@ router.get('/payments', auth, getPayments);
 router.patch('/payments/:id', auth, updateTransactionStatus);
 
 // Spin Wheel Configuration
-router.get('/spin-config', auth, getSpinConfig);
-router.post('/spin-config', auth, updateSpinConfig);
+router.get('/spin-config', auth, getSpinConfig); // Now managed by adminSettingsController
+router.post('/spin-config', auth, updateSpinConfig); // Now managed by adminSettingsController
 
 // Settings Management
 router.get('/settings', auth, getSettings);

@@ -12,7 +12,7 @@ class Video {
 
         if (platform) {
             params.push(platform);
-            conditions.push(`platform = $${params.length}`);
+            conditions.push(`LOWER(platform) = LOWER($${params.length})`);
         }
 
         if (conditions.length > 0) {

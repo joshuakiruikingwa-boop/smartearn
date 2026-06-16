@@ -5,7 +5,7 @@ const Survey = require('../models/Survey');
 // @access  Private (Admin only)
 const getSurveys = async (req, res) => {
     try {
-        const surveys = await Survey.findAll();
+        const surveys = await Survey.findAll(false); // Admin sees all surveys
         res.status(200).json({ success: true, surveys });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Server error: ' + error.message });

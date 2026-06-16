@@ -12,9 +12,9 @@ const getVideos = async (req, res) => {
     const { platform } = req.params;
     try {
         const videos = await Video.findAll(platform);
-        res.status(200).json(videos);
+        res.status(200).json({ success: true, videos });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
@@ -24,9 +24,9 @@ const getVideos = async (req, res) => {
 const getSurveys = async (req, res) => {
     try {
         const surveys = await Survey.findAll();
-        res.status(200).json(surveys);
+        res.status(200).json({ success: true, surveys });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
@@ -34,28 +34,74 @@ const getSurveys = async (req, res) => {
 // @route   POST /api/tasks/complete
 // @access  Private
 const completeTask = async (req, res) => {
-    const { taskType, taskId, rewardAmount } = req.body;
+    const { taskType, taskId } = req.body;
     const userId = req.user.id; // From authMiddleware
 
+    const client = await pool.connect();
     try {
+        await client.query('BEGIN');
+
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ message: 'User not found' });
 
-        // Daily limit check disabled
+        // Limit survey rewards to once per day
+        if (['survey', 'surveys'].includes(taskType.toLowerCase())) {
+            const checkRes = await client.query(
+                "SELECT id FROM user_tasks WHERE user_id = $1 AND LOWER(task_type) IN ('survey', 'surveys') AND created_at >= CURRENT_DATE",
+                [userId]
+            );
+            if (checkRes.rows.length > 0) {
+                return res.status(403).json({ success: false, message: 'You have already completed a survey today. Please try again tomorrow.' });
+            }
+        }
+
+        let actualReward = 0;
+        // Security: Fetch task details from DB to verify reward
+        if (['youtube', 'tiktok', 'video'].includes(taskType.toLowerCase())) {
+            const video = await Video.findById(taskId);
+            if (!video || video.status !== 'active') throw new Error('Video task not found or inactive');
+            actualReward = parseFloat(video.reward);
+        } else if (['survey', 'surveys'].includes(taskType.toLowerCase())) {
+            const survey = await Survey.findById(taskId);
+            if (!survey || survey.status !== 'active') throw new Error('Survey not found or inactive');
+            actualReward = parseFloat(survey.reward);
+        } else {
+            throw new Error('Invalid task type');
+        }
 
         // Calculate actual reward based on membership multiplier
         const multiplier = parseFloat(user.earning_multiplier || 1.0);
-        const finalReward = rewardAmount * multiplier;
+        const finalReward = actualReward * multiplier;
 
-        const userTask = await UserTask.create({ userId, taskType, taskId, rewardAmount: finalReward });
-        await pool.query('UPDATE users SET balance = balance + $1 WHERE id = $2', [finalReward, userId]);
+        const taskRes = await client.query(
+            'INSERT INTO user_tasks (user_id, task_type, task_id, reward_amount) VALUES ($1, $2, $3, $4) RETURNING *',
+            [userId, taskType, taskId, finalReward]
+        );
+        const userTask = taskRes.rows[0];
+
+        // Update specific wallet balance
+        const walletMapping = {
+            'youtube': 'youtube_balance',
+            'tiktok': 'tiktok_balance',
+            'surveys': 'surveys_balance',
+            'survey': 'surveys_balance'
+        };
+        const specificWallet = walletMapping[taskType.toLowerCase()];
+        const updateQuery = specificWallet 
+            ? `UPDATE users SET balance = balance + $1, ${specificWallet} = ${specificWallet} + $1 WHERE id = $2`
+            : 'UPDATE users SET balance = balance + $1 WHERE id = $2';
+
+        await client.query(updateQuery, [finalReward, userId]);
 
         // Increment view count if the task is a video or platform-specific task
         if (['video', 'youtube', 'tiktok'].includes(taskType.toLowerCase())) {
-            await pool.query('UPDATE videos SET views = views + 1 WHERE id = $1', [taskId]);
+            await client.query('UPDATE videos SET views = views + 1 WHERE id = $1', [taskId]);
         }
 
-        await Transaction.create({ userId, type: 'earning', amount: finalReward, description: `${taskType} completion (${multiplier}x multiplier)` });
+        await client.query(
+            'INSERT INTO transactions (user_id, type, amount, description, status) VALUES ($1, $2, $3, $4, $5)',
+            [userId, 'earning', finalReward, `${taskType} completion (${multiplier}x multiplier)`, 'completed']
+        );
 
         // Handle 3-Tier Referral Commissions
         const commissionTiers = [0.10, 0.05, 0.02]; // 10%, 5%, 2%
@@ -64,7 +110,7 @@ const completeTask = async (req, res) => {
         for (let i = 0; i < commissionTiers.length; i++) {
             if (!currentReferrerCode) break;
 
-            const refRes = await pool.query(
+            const refRes = await client.query(
                 'SELECT id, full_name, referred_by FROM users WHERE referral_code = $1',
                 [currentReferrerCode]
             );
@@ -73,20 +119,24 @@ const completeTask = async (req, res) => {
             const referrer = refRes.rows[0];
 
             const commission = finalReward * commissionTiers[i];
-            await pool.query('UPDATE users SET balance = balance + $1 WHERE id = $2', [commission, referrer.id]);
-            await Transaction.create({
-                userId: referrer.id,
-                type: 'referral_commission',
-                amount: commission,
-                description: `L${i + 1} commission from ${user.full_name}'s ${taskType}`
-            });
+            await client.query('UPDATE users SET balance = balance + $1, referrals_balance = referrals_balance + $1 WHERE id = $2', [commission, referrer.id]);
+            
+            await client.query(
+                'INSERT INTO transactions (user_id, type, amount, description, status, referred_user_id) VALUES ($1, $2, $3, $4, $5, $6)',
+                [referrer.id, 'referral_commission', commission, `L${i + 1} commission from ${user.full_name}'s ${taskType}`, 'completed', userId]
+            );
 
             currentReferrerCode = referrer.referred_by;
         }
 
+        await client.query('COMMIT');
         res.status(200).json({ message: 'Task completed and reward credited!', userTask });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        await client.query('ROLLBACK');
+        console.error('Task Completion Error:', error.message);
+        res.status(500).json({ success: false, message: error.message });
+    } finally {
+        client.release();
     }
 };
 
@@ -96,7 +146,10 @@ const completeTask = async (req, res) => {
 const handleSpin = async (req, res) => {
     const userId = req.user.id;
 
+    const client = await pool.connect();
     try {
+        await client.query('BEGIN');
+
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ message: 'User not found' });
 
@@ -127,26 +180,32 @@ const handleSpin = async (req, res) => {
         // Removed multiplier to ensure user wins the exact amount shown on the wheel
         const finalPrize = prize;
 
-        await UserTask.create({ userId, taskType: 'spin', taskId: 0, rewardAmount: finalPrize });
+        await client.query(
+            'INSERT INTO user_tasks (user_id, task_type, task_id, reward_amount) VALUES ($1, $2, $3, $4)',
+            [userId, 'spin', 0, finalPrize]
+        );
         
         if (finalPrize > 0) {
-            await pool.query('UPDATE users SET balance = balance + $1 WHERE id = $2', [finalPrize, userId]);
-            await Transaction.create({ 
-                userId, 
-                type: 'earning', 
-                amount: finalPrize, 
-                description: `Lucky Spin Win` 
-            });
+            await client.query('UPDATE users SET balance = balance + $1, spin_balance = spin_balance + $1 WHERE id = $2', [finalPrize, userId]);
+            await client.query(
+                'INSERT INTO transactions (user_id, type, amount, description, status) VALUES ($1, $2, $3, $4, $5)',
+                [userId, 'earning', finalPrize, 'Lucky Spin Win', 'completed']
+            );
         }
 
+        await client.query('COMMIT');
         res.status(200).json({ 
-            prize: finalPrize, 
+            success: true,
+            prize: finalPrize,
             prizeIndex, 
             message: finalPrize > 0 ? `You won Ksh ${finalPrize}!` : "Better luck next time!" 
         });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        await client.query('ROLLBACK');
+        console.error('Spin Error:', error.message);
+        res.status(500).json({ success: false, message: error.message });
+    } finally {
+        client.release();
     }
 };
-
 module.exports = { getVideos, getSurveys, completeTask, handleSpin };

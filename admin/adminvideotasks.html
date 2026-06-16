@@ -45,6 +45,10 @@
                     <i class="fas fa-hand-holding-dollar w-5"></i>
                     <span>Payout Requests</span>
                 </a>
+                <a href="adminpayments.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-credit-card w-5"></i>
+                    <span>Payment Settings</span>
+                </a>
                 <a href="adminsurveys.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
                     <i class="fas fa-poll-h w-5"></i>
                     <span>Surveys</span>
@@ -53,10 +57,18 @@
                     <i class="fab fa-youtube w-5"></i>
                     <span>Video Tasks</span>
                 </a>
+                <a href="adminspin.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-dharmachakra w-5"></i>
+                    <span>Spin Logs</span>
+                </a>
                 <a href="adminsettings.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
                     <i class="fas fa-cogs w-5"></i>
                     <span>System Settings</span>
                 </a>
+                <button onclick="logout()" class="flex w-full items-center space-x-3 hover:bg-red-600/10 text-slate-400 hover:text-red-500 p-3 rounded-xl transition mt-auto">
+                    <i class="fas fa-sign-out-alt w-5"></i>
+                    <span>Sign Out</span>
+                </button>
             </nav>
         </aside>
 
@@ -189,7 +201,11 @@
     </div>
 
     <script>
-        const API_BASE_URL = 'http://localhost:5000';
+        // Robust API URL detection for Local Dev vs Production
+        const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
+        const API_BASE_URL = isDevelopment && (window.location.port !== '5000')
+            ? `${window.location.protocol}//${window.location.hostname}:5000`
+            : window.location.origin;
 
         let allVideos = []; // Stores all fetched videos
 
@@ -291,6 +307,11 @@
             });
         }
 
+        function logout() {
+            localStorage.removeItem('adminToken');
+            window.location.href = '/admin/login';
+        }
+
         // Modal Control
         const videoModal = document.getElementById('video-modal');
         const videoForm = document.getElementById('video-form');
@@ -349,7 +370,7 @@
 
             const videoId = videoIdHiddenInput.value;
             const method = videoId ? 'PUT' : 'POST';
-            const url = videoId ? `/admin/videos/${videoId}` : '/admin/videos';
+            const url = videoId ? `${API_BASE_URL}/admin/videos/${videoId}` : `${API_BASE_URL}/admin/videos`;
             const token = localStorage.getItem('adminToken');
 
             if (!token) {
@@ -402,7 +423,7 @@
 
             try {
                 const token = localStorage.getItem('adminToken');
-                const response = await fetch(`/admin/videos/${videoId}`, {
+                const response = await fetch(`${API_BASE_URL}/admin/videos/${videoId}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}`

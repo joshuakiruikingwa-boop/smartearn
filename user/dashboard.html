@@ -150,20 +150,37 @@
                 </div>
             </header>
 
-            <!-- Balance & Analytics Section -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
-                <!-- Balance Card -->
-                <div class="bg-white/5 backdrop-blur-md p-8 rounded-3xl border border-white/10 flex flex-col justify-center">
-                    <p class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-2">Total Balance</p>
-                    <h2 id="total-balance" class="text-5xl font-extrabold text-white mb-4">Ksh 0.00</h2>
-                    <div class="flex items-center space-x-2 text-green-400 text-sm font-bold">
-                        <i class="fas fa-arrow-trend-up"></i>
-                        <span>+12.5% from last week</span>
+            <!-- Top Stats Section -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <!-- Available Balance Card -->
+                <div class="bg-white/5 backdrop-blur-md p-8 rounded-[2rem] border border-white/10 flex flex-col justify-center relative overflow-hidden group hover:border-blue-500/30 transition-all duration-500">
+                    <div class="absolute -right-4 -bottom-4 text-blue-500/5 text-8xl transform rotate-12 group-hover:scale-110 transition-transform duration-500">
+                        <i class="fas fa-wallet"></i>
                     </div>
+                    <p class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-2">Available Balance</p>
+                    <h2 id="total-balance" class="text-4xl sm:text-5xl font-extrabold text-white mb-2">Ksh 0.00</h2>
+                    <p class="text-green-400 text-xs font-bold flex items-center">
+                        <i class="fas fa-check-circle mr-2"></i> Verified & Active
+                    </p>
                 </div>
-                
+
+                <!-- Total Withdrawals Card -->
+                <div class="bg-white/5 backdrop-blur-md p-8 rounded-[2rem] border border-white/10 flex flex-col justify-center relative overflow-hidden group hover:border-emerald-500/30 transition-all duration-500">
+                    <div class="absolute -right-4 -bottom-4 text-emerald-500/5 text-8xl transform rotate-12 group-hover:scale-110 transition-transform duration-500">
+                        <i class="fas fa-money-bill-transfer"></i>
+                    </div>
+                    <p class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-2">Total Withdrawals</p>
+                    <h2 id="total-withdrawals" class="text-4xl sm:text-5xl font-extrabold text-white mb-2">Ksh 0.00</h2>
+                    <p class="text-blue-400 text-xs font-bold flex items-center">
+                        <i class="fas fa-clock-rotate-left mr-2"></i> Lifetime Paid Out
+                    </p>
+                </div>
+            </div>
+
+            <!-- Analytics Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
                 <!-- Revenue Trend Card -->
-                <div class="bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/10">
+                <div class="bg-white/5 backdrop-blur-md p-6 rounded-[2rem] border border-white/10">
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="font-bold text-white">Weekly Revenue</h3>
                         <select class="bg-white/5 border border-white/10 text-[10px] text-slate-500 font-bold uppercase tracking-tighter rounded-lg px-2 py-1 outline-none">
@@ -177,7 +194,7 @@
                 </div>
 
                 <!-- Task Volume Card -->
-                <div class="bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/10">
+                <div class="bg-white/5 backdrop-blur-md p-6 rounded-[2rem] border border-white/10">
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="font-bold text-white">Task Completion</h3>
                         <select class="bg-white/5 border border-white/10 text-[10px] text-slate-500 font-bold uppercase tracking-tighter rounded-lg px-2 py-1 outline-none">
@@ -225,7 +242,14 @@
                 });
                 document.getElementById('total-balance').innerText = `Ksh ${balance}`;
 
-                // 3. Reflect Membership Role
+                // 3. Reflect Withdrawals
+                const withdrawals = parseFloat(user.total_withdrawals || 0).toLocaleString('en-KE', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+                document.getElementById('total-withdrawals').innerText = `Ksh ${withdrawals}`;
+
+                // 4. Reflect Membership Role
                 if (user.membership_name) {
                     document.getElementById('sidebar-role').innerText = `${user.membership_name} Member`;
                 }

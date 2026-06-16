@@ -2,12 +2,16 @@ const express = require('express');
 const router = express.Router();
 const auth = require('../authMiddleware');
 const { getVideos, getSurveys, completeTask, handleSpin } = require('../controllers/taskController');
+const { getSpinConfig } = require('../controllers/adminSettingsController'); // Import from adminSettingsController
 
 // Video tasks
 router.get('/videos/:platform', auth, getVideos); // Fetches active videos for a specific platform
 
 // Survey tasks
 router.get('/surveys', auth, getSurveys); // Fetches available surveys
+
+// Public config for spin wheel
+router.get('/spin-config', getSpinConfig);
 
 // Complete task (for videos, surveys, etc.)
 router.post('/complete', auth, completeTask); // Records task completion and awards rewards

@@ -12,6 +12,22 @@
     <!-- Animated Balloon Background -->
     <canvas id="balloon-canvas" class="fixed inset-0 z-[-1] pointer-events-none"></canvas>
 
+    <!-- Alert/Message Interface -->
+    <div id="message-container" class="fixed bottom-8 right-8 z-[100] transform translate-x-[120%] opacity-0 transition-all duration-700 pointer-events-none">
+        <div class="bg-emerald-600/10 backdrop-blur-2xl border border-emerald-500/30 p-6 rounded-[2rem] shadow-2xl shadow-emerald-900/20 flex items-center space-x-4 min-w-[320px] max-w-md">
+            <div class="w-12 h-12 bg-emerald-500/20 text-emerald-500 rounded-2xl flex items-center justify-center text-xl border border-emerald-500/20">
+                <i id="msg-icon" class="fas fa-check-circle"></i>
+            </div>
+            <div class="flex-1">
+                <p id="msg-label" class="text-emerald-500 text-[10px] font-black uppercase tracking-[0.2em] mb-1">System Notification</p>
+                <p id="msg-content" class="text-white font-bold text-sm leading-relaxed">Operation completed successfully.</p>
+            </div>
+            <button onclick="hideMessage()" class="text-emerald-500/50 hover:text-white transition pointer-events-auto">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
     <!-- Mobile Sidebar Toggle Button -->
     <button id="mobile-toggle" class="md:hidden fixed top-6 left-6 z-[60] w-12 h-12 flex items-center justify-center bg-slate-900/90 border border-white/10 rounded-2xl text-blue-500 shadow-2xl active:scale-90 transition-all backdrop-blur-md">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -65,6 +81,7 @@
                     <i class="fas fa-cog w-5"></i>
                     <span>Settings</span>
                 </a>
+            </nav>
         </aside>
 
         <!-- Main Content -->
@@ -85,23 +102,52 @@
             <!-- LEFT COLUMN: BALANCE & WITHDRAW FORM -->
             <div class="lg:col-span-2 space-y-6">
                 
-                <!-- Balance Card -->
-                <div class="bg-white/5 backdrop-blur-md rounded-[2rem] p-8 text-white relative overflow-hidden border border-white/10 shadow-2xl">
-                    <div class="relative z-10 flex justify-between items-center">
-                        <div>
-                            <p class="text-slate-500 text-xs font-bold uppercase tracking-widest mb-2">Available for Withdrawal</p>
-                            <h2 id="balance-amount" class="text-5xl font-extrabold">Ksh 0.00</h2>
-                        </div>
-                        <div class="text-right">
-                            <div class="bg-white/5 backdrop-blur-md rounded-2xl p-3 inline-block border border-white/10">
-                                <p class="text-[10px] uppercase font-bold text-slate-400">Min. Threshold</p>
-                                <p class="text-lg font-bold">Ksh 50.00</p>
-                            </div>
-                        </div>
+                <!-- Wallet Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <!-- Total Wallet -->
+                    <div class="bg-blue-600 rounded-3xl p-6 text-white border border-white/10 shadow-2xl col-span-2 md:col-span-1">
+                        <p class="text-[10px] font-bold uppercase tracking-widest opacity-70 mb-1">Total Balance</p>
+                        <h2 id="total-balance-wallet" class="text-2xl font-black">Ksh 0.00</h2>
                     </div>
-                    <!-- Progress Bar to next payout -->
-                    <div class="mt-10 relative h-2 bg-white/10 rounded-full overflow-hidden">
-                        <div id="balance-progress" class="absolute top-0 left-0 h-full bg-blue-500 transition-all duration-1000" style="width: 0%"></div>
+                    <!-- TikTok Wallet -->
+                    <div class="bg-white/5 backdrop-blur-md rounded-3xl p-5 border border-white/10">
+                        <div class="flex items-center space-x-2 mb-2">
+                            <i class="fab fa-tiktok text-blue-500 text-xs"></i>
+                            <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">TikTok Earnings</p>
+                        </div>
+                        <h3 id="tiktok-balance" class="text-xl font-bold text-white">Ksh 0.00</h3>
+                    </div>
+                    <!-- YouTube Wallet -->
+                    <div class="bg-white/5 backdrop-blur-md rounded-3xl p-5 border border-white/10">
+                        <div class="flex items-center space-x-2 mb-2">
+                            <i class="fab fa-youtube text-red-500 text-xs"></i>
+                            <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">YouTube Earnings</p>
+                        </div>
+                        <h3 id="youtube-balance" class="text-xl font-bold text-white">Ksh 0.00</h3>
+                    </div>
+                    <!-- Surveys Wallet -->
+                    <div class="bg-white/5 backdrop-blur-md rounded-3xl p-5 border border-white/10">
+                        <div class="flex items-center space-x-2 mb-2">
+                            <i class="fas fa-poll-h text-purple-500 text-xs"></i>
+                            <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Survey Earnings</p>
+                        </div>
+                        <h3 id="surveys-balance" class="text-xl font-bold text-white">Ksh 0.00</h3>
+                    </div>
+                    <!-- Spin Wallet -->
+                    <div class="bg-white/5 backdrop-blur-md rounded-3xl p-5 border border-white/10">
+                        <div class="flex items-center space-x-2 mb-2">
+                            <i class="fas fa-dharmachakra text-amber-500 text-xs"></i>
+                            <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Spin Wins</p>
+                        </div>
+                        <h3 id="spin-balance" class="text-xl font-bold text-white">Ksh 0.00</h3>
+                    </div>
+                    <!-- Referral Wallet -->
+                    <div class="bg-white/5 backdrop-blur-md rounded-3xl p-5 border border-white/10">
+                        <div class="flex items-center space-x-2 mb-2">
+                            <i class="fas fa-users text-emerald-500 text-xs"></i>
+                            <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Referral Rewards</p>
+                        </div>
+                        <h3 id="referrals-balance" class="text-xl font-bold text-white">Ksh 0.00</h3>
                     </div>
                 </div>
 
@@ -110,6 +156,19 @@
                     <h3 class="text-lg font-bold mb-6 text-white">Request Payout</h3>
                     
                     <form id="withdraw-form" class="space-y-6">
+                        <!-- Wallet Source Selection -->
+                        <div>
+                            <label class="block text-sm font-bold text-slate-400 mb-2 uppercase tracking-widest">Withdraw From Wallet</label>
+                            <select id="wallet-source" class="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-6 font-bold focus:ring-2 focus:ring-blue-600 outline-none text-white appearance-none">
+                                <option value="total" class="bg-slate-900">Total Balance</option>
+                                <option value="tiktok" class="bg-slate-900">TikTok Wallet</option>
+                                <option value="youtube" class="bg-slate-900">YouTube Wallet</option>
+                                <option value="surveys" class="bg-slate-900">Survey Wallet</option>
+                                <option value="spin" class="bg-slate-900">Spin Wallet</option>
+                                <option value="referrals" class="bg-slate-900">Referral Wallet</option>
+                            </select>
+                        </div>
+
                         <!-- Method Toggle -->
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <label class="method-card cursor-pointer border-2 border-blue-600 bg-blue-600/10 p-4 rounded-2xl flex flex-col items-center justify-center transition shadow-xl shadow-blue-900/20" data-method="MPESA">
@@ -190,12 +249,29 @@
         // Auth & Payout Logic
         const API_BASE = '/api'; // Maps to your localhost:5000/api
         const token = localStorage.getItem('token');
+        let withdrawalLimits = {
+            min: { total: 50, tiktok: 50, youtube: 50, surveys: 50, spin: 50, referrals: 50 },
+            max: { total: 1000000, tiktok: 1000000, youtube: 1000000, surveys: 1000000, spin: 1000000, referrals: 1000000 }
+        };
 
         // Fetch User Balance and History on Load
         document.addEventListener('DOMContentLoaded', async () => {
             fetchUserData();
+            fetchSettings();
             // setupMethodSelection();
         });
+
+        async function fetchSettings() {
+            try {
+                const response = await fetch(`${API_BASE}/auth/settings`);
+                const data = await response.json();
+                if (data.success && data.withdrawalLimits) {
+                    withdrawalLimits = data.withdrawalLimits;
+                }
+            } catch (error) {
+                console.error('Error fetching settings:', error);
+            }
+        }
 
         async function fetchUserData() {
             try {
@@ -205,17 +281,29 @@
                 });
                 const data = await response.json();
                 
-                if (data.balance !== undefined) {
-                    const balance = parseFloat(data.balance);
-                    document.getElementById('balance-amount').innerText = `Ksh ${balance.toFixed(2)}`;
-                    
-                    // Update progress bar (assuming 50 is the goal for withdrawal)
-                    const progress = Math.min((balance / 50) * 100, 100);
-                    document.getElementById('balance-progress').style.width = `${progress}%`;
-                }
+                // Populate Wallets
+                updateBalanceDisplay('total-balance-wallet', data.balance);
+                
+                // Populate individual wallets if provided by backend, otherwise default to 0.00
+                updateBalanceDisplay('tiktok-balance', data.tiktok_balance || 0);
+                updateBalanceDisplay('youtube-balance', data.youtube_balance || 0);
+                updateBalanceDisplay('surveys-balance', data.surveys_balance || 0);
+                updateBalanceDisplay('spin-balance', data.spin_balance || 0);
+                updateBalanceDisplay('referrals-balance', data.referrals_balance || 0);
+                
             } catch (err) {
                 console.error("Failed to fetch balance", err);
             }
+        }
+
+        function updateBalanceDisplay(id, amount) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const val = parseFloat(amount || 0);
+            el.innerText = `Ksh ${val.toLocaleString(undefined, { 
+                minimumFractionDigits: 2, 
+                maximumFractionDigits: 2 
+            })}`;
         }
 
         // Handle Payout Method UI Toggle
@@ -315,16 +403,52 @@
             }
         });
 
+        /**
+         * Displays a notification message to the user.
+         * @param {string} text - The message body
+         * @param {string} type - 'success' or 'error'
+         */
+        function showMessage(text, type = 'success') {
+            const container = document.getElementById('message-container');
+            const content = document.getElementById('msg-content');
+            const label = document.getElementById('msg-label');
+            const icon = document.getElementById('msg-icon');
+
+            content.innerText = text;
+            
+            // Interface styled with green (emerald) background and border per request
+            label.innerText = type === 'error' ? 'System Alert' : 'System Notification';
+            icon.className = type === 'error' ? 'fas fa-exclamation-triangle' : 'fas fa-check-circle';
+            
+            container.classList.remove('translate-x-[120%]', 'opacity-0');
+            container.classList.add('translate-x-0', 'opacity-100');
+
+            setTimeout(hideMessage, 6000);
+        }
+
+        function hideMessage() {
+            const container = document.getElementById('message-container');
+            container.classList.add('translate-x-[120%]', 'opacity-0');
+            container.classList.remove('translate-x-0', 'opacity-100');
+        }
+
         // Handle Withdrawal Submission
         document.getElementById('withdraw-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const submitBtn = document.getElementById('submit-btn');
             const amount = document.getElementById('withdraw-amount').value;
+            const source = document.getElementById('wallet-source').value;
             const method = document.querySelector('input[name="payout_method"]:checked').value;
             const details = document.getElementById('payout-identifier').value;
 
-            if (!amount || amount < 50) {
-                return alert("Minimum withdrawal amount is Ksh 50.00");
+            const minLimit = parseFloat(withdrawalLimits.min[source] || 50);
+            const maxLimit = parseFloat(withdrawalLimits.max[source] || 1000000);
+
+            if (!amount || amount < minLimit) {
+                return showMessage(`Minimum withdrawal amount for ${source.toUpperCase()} wallet is Ksh ${minLimit.toFixed(2)}`, 'error');
+            }
+            if (amount > maxLimit) {
+                return showMessage(`Maximum withdrawal amount for ${source.toUpperCase()} wallet is Ksh ${maxLimit.toFixed(2)}`, 'error');
             }
 
             submitBtn.disabled = true;
@@ -333,7 +457,7 @@
             if (method === 'MPESA') {
                 const network = getNetwork(details);
                 if (!network || network.name !== 'Safaricom') {
-                    alert('For M-Pesa withdrawals, please enter a valid Safaricom number.');
+                    showMessage('For M-Pesa withdrawals, please enter a valid Safaricom number.', 'error');
                     submitBtn.disabled = false;
                     return;
                 }
@@ -341,7 +465,7 @@
             submitBtn.innerText = "Processing...";
 
             // Example fetch request to your backend (need to implement this route)
-            alert(`Request Submitted!\nMethod: ${method}\nAmount: Ksh ${amount}\nAccount: ${details}\n\nPlease allow 24-48 hours for verification.`);
+            showMessage(`Request Submitted! Your Ksh ${amount} withdrawal to ${details} is being processed. Please allow 24-48 hours.`);
             
             // Reset Form
             submitBtn.disabled = false;

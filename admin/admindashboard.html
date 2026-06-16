@@ -58,6 +58,10 @@
                     <i class="fab fa-youtube w-5"></i>
                     <span>Video Tasks</span>
                 </a>
+                <a href="adminspin.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-dharmachakra w-5"></i>
+                    <span>Spin Logs</span>
+                </a>
                 <a href="adminsettings.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
                     <i class="fas fa-cogs w-5"></i>
                     <span>System Settings</span>
@@ -92,7 +96,7 @@
             </header>
 
             <!-- Admin Stats Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-10">
                 <div class="bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/10">
                     <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Total Active Users</p>
                     <h2 id="total-users" class="text-3xl font-extrabold text-white">0</h2>
@@ -109,9 +113,77 @@
                     <p id="site-revenue-sub" class="text-blue-400 text-[10px] mt-2 font-bold">Total Paid</p>
                 </div>
                 <div class="bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/10">
+                    <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Spin Rewards</p>
+                    <h2 id="total-spin-wins" class="text-3xl font-extrabold text-emerald-400">Ksh 0.00</h2>
+                    <p id="total-spin-count" class="text-slate-500 text-[10px] mt-2 font-bold">0 Spins</p>
+                </div>
+                <div class="bg-white/5 backdrop-blur-md p-6 rounded-3xl border border-white/10">
                     <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-1">Active Tasks</p>
                     <h2 id="active-tasks" class="text-3xl font-extrabold text-white">0</h2>
                     <p id="active-tasks-sub" class="text-slate-500 text-[10px] mt-2 font-bold">Surveys & Videos</p>
+                </div>
+            </div>
+
+            <!-- Management Portal Grid -->
+            <div class="mb-10">
+                <h3 class="text-xl font-bold text-white mb-6">Management Portal</h3>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <a href="adminusermanagement.html" class="bg-white/5 border border-white/10 p-6 rounded-3xl backdrop-blur-md hover:bg-white/10 transition group text-center">
+                        <div class="w-12 h-12 bg-blue-600/20 text-blue-500 rounded-2xl flex items-center justify-center text-xl mx-auto mb-4 group-hover:scale-110 transition">
+                            <i class="fas fa-users-cog"></i>
+                        </div>
+                        <p class="text-white font-bold text-sm">Users</p>
+                        <p class="text-slate-500 text-[10px] mt-1">Manage accounts</p>
+                    </a>
+                    <a href="adminpayouts.html" class="bg-white/5 border border-white/10 p-6 rounded-3xl backdrop-blur-md hover:bg-white/10 transition group text-center">
+                        <div class="w-12 h-12 bg-amber-500/20 text-amber-500 rounded-2xl flex items-center justify-center text-xl mx-auto mb-4 group-hover:scale-110 transition">
+                            <i class="fas fa-hand-holding-dollar"></i>
+                        </div>
+                        <p class="text-white font-bold text-sm">Payouts</p>
+                        <p class="text-slate-500 text-[10px] mt-1">Review requests</p>
+                    </a>
+                    <a href="adminpayments.html" class="bg-white/5 border border-white/10 p-6 rounded-3xl backdrop-blur-md hover:bg-white/10 transition group text-center">
+                        <div class="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center text-xl mx-auto mb-4 group-hover:scale-110 transition">
+                            <i class="fas fa-credit-card"></i>
+                        </div>
+                        <p class="text-white font-bold text-sm">Payments</p>
+                        <p class="text-slate-500 text-[10px] mt-1">Gateway settings</p>
+                    </a>
+                    <a href="adminsurveys.html" class="bg-white/5 border border-white/10 p-6 rounded-3xl backdrop-blur-md hover:bg-white/10 transition group text-center">
+                        <div class="w-12 h-12 bg-purple-500/20 text-purple-400 rounded-2xl flex items-center justify-center text-xl mx-auto mb-4 group-hover:scale-110 transition">
+                            <i class="fas fa-poll-h"></i>
+                        </div>
+                        <p class="text-white font-bold text-sm">Surveys</p>
+                        <p class="text-slate-500 text-[10px] mt-1">Manage tasks</p>
+                    </a>
+                    <a href="adminvideotasks.html" class="bg-white/5 border border-white/10 p-6 rounded-3xl backdrop-blur-md hover:bg-white/10 transition group text-center">
+                        <div class="w-12 h-12 bg-red-500/20 text-red-500 rounded-2xl flex items-center justify-center text-xl mx-auto mb-4 group-hover:scale-110 transition">
+                            <i class="fab fa-youtube"></i>
+                        </div>
+                        <p class="text-white font-bold text-sm">Videos</p>
+                        <p class="text-slate-500 text-[10px] mt-1">Watch rewards</p>
+                    </a>
+                    <a href="adminspin.html" class="bg-white/5 border border-white/10 p-6 rounded-3xl backdrop-blur-md hover:bg-white/10 transition group text-center">
+                        <div class="w-12 h-12 bg-blue-500/20 text-blue-400 rounded-2xl flex items-center justify-center text-xl mx-auto mb-4 group-hover:scale-110 transition">
+                            <i class="fas fa-dharmachakra"></i>
+                        </div>
+                        <p class="text-white font-bold text-sm">Spin Logs</p>
+                        <p class="text-slate-500 text-[10px] mt-1">Activity logs</p>
+                    </a>
+                    <a href="adminsettings.html" class="bg-white/5 border border-white/10 p-6 rounded-3xl backdrop-blur-md hover:bg-white/10 transition group text-center">
+                        <div class="w-12 h-12 bg-slate-500/20 text-slate-400 rounded-2xl flex items-center justify-center text-xl mx-auto mb-4 group-hover:scale-110 transition">
+                            <i class="fas fa-cogs"></i>
+                        </div>
+                        <p class="text-white font-bold text-sm">Settings</p>
+                        <p class="text-slate-500 text-[10px] mt-1">System params</p>
+                    </a>
+                    <button onclick="resetSystem()" class="bg-red-600/10 border border-red-500/20 p-6 rounded-3xl backdrop-blur-md hover:bg-red-600/20 transition group text-center">
+                        <div class="w-12 h-12 bg-red-600/20 text-red-500 rounded-2xl flex items-center justify-center text-xl mx-auto mb-4 group-hover:scale-110 transition">
+                            <i class="fas fa-trash-alt"></i>
+                        </div>
+                        <p class="text-red-500 font-bold text-sm">Reset</p>
+                        <p class="text-slate-500 text-[10px] mt-1">Clear all data</p>
+                    </button>
                 </div>
             </div>
 
@@ -128,6 +200,26 @@
                     <div class="h-64">
                         <canvas id="payoutChart"></canvas>
                     </div>
+                </div>
+            </div>
+
+            <!-- Recent Activation Payments Table -->
+            <div class="bg-white/5 backdrop-blur-md rounded-[2.5rem] border border-white/10 overflow-hidden mb-10">
+                <div class="p-8 border-b border-white/10 flex justify-between items-center">
+                    <h3 class="font-bold text-white">Recent Activation Payments</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-white/5 text-[10px] uppercase font-bold text-slate-500 tracking-widest">
+                            <tr>
+                                <th class="px-8 py-4">User</th>
+                                <th class="px-8 py-4">Amount</th>
+                                <th class="px-8 py-4">Date</th>
+                                <th class="px-8 py-4 text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-payments-body" class="divide-y divide-white/5"></tbody>
+                    </table>
                 </div>
             </div>
 
@@ -156,7 +248,11 @@
     </div>
 
     <script>
-        const API_BASE_URL = 'http://localhost:5000';
+        // Robust API URL detection for Local Dev vs Production
+        const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
+        const API_BASE_URL = isDevelopment && (window.location.port !== '5000')
+            ? `${window.location.protocol}//${window.location.hostname}:5000`
+            : window.location.origin;
 
         // Mobile Sidebar Functionality
         const sidebar = document.getElementById('sidebar');
@@ -169,6 +265,37 @@
         }
         mobileToggle.onclick = toggleSidebar;
         overlay.onclick = toggleSidebar;
+
+        function logout() {
+            localStorage.removeItem('adminToken');
+            window.location.href = '/admin/login';
+        }
+
+        function renderRecentPayments(payments) {
+            const tbody = document.getElementById('recent-payments-body');
+            tbody.innerHTML = '';
+            
+            if (payments.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="px-8 py-10 text-center text-slate-500 italic">No recent activation payments.</td></tr>`;
+                return;
+            }
+
+            payments.slice(0, 10).forEach(p => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-white/5 transition">
+                        <td class="px-8 py-4">
+                            <p class="text-white font-bold text-sm">${p.full_name || p.username}</p>
+                            <p class="text-[10px] text-slate-500">${p.email}</p>
+                        </td>
+                        <td class="px-8 py-4 text-emerald-400 font-bold">Ksh ${parseFloat(p.amount).toLocaleString()}</td>
+                        <td class="px-8 py-4 text-slate-500 text-xs">${new Date(p.created_at).toLocaleString()}</td>
+                        <td class="px-8 py-4 text-center">
+                            <span class="bg-emerald-500/10 text-emerald-500 px-3 py-1 rounded-full text-[10px] font-bold uppercase">${p.status}</span>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
 
         function renderRecentWithdrawals(withdrawals) {
             const tbody = document.getElementById('recent-payouts-body');
@@ -187,9 +314,9 @@
                     <tr class="hover:bg-white/5 transition">
                         <td class="px-8 py-4">
                             <p class="text-white font-bold text-sm">${w.full_name}</p>
-                            <p class="text-[10px] text-slate-500">${w.phone_number || w.email}</p>
+                            <p class="text-[10px] text-slate-500 uppercase font-bold tracking-tight">${w.method}: <span class="text-blue-400 font-mono">${w.payout_identifier}</span></p>
                         </td>
-                        <td class="px-8 py-4 text-sm font-medium">${w.method}</td>
+                        <td class="px-8 py-4 text-xs font-medium text-slate-400 italic">${new Date(w.created_at).toLocaleDateString()}</td>
                         <td class="px-8 py-4 text-right text-white font-bold">Ksh ${parseFloat(w.amount).toLocaleString()}</td>
                         <td class="px-8 py-4 text-center">
                             <span class="${statusColor} px-3 py-1 rounded-full text-[10px] font-bold uppercase">${w.status}</span>
@@ -214,18 +341,35 @@
                     throw new Error('Failed to fetch dashboard stats');
                 }
                 const data = await response.json();
+                
+                if (!data.success || !data.stats) {
+                    throw new Error(data.message || 'Stats data unavailable');
+                }
+
                 const stats = data.stats;
 
                 document.getElementById('total-users').textContent = stats.activeUsers.toLocaleString();
-                document.getElementById('total-users-sub').textContent = `${stats.totalUsers.toLocaleString()} Total Users`;
+                document.getElementById('total-users-sub').textContent = `${stats.totalUsers.toLocaleString()} Total Registered`;
 
                 document.getElementById('pending-payouts').textContent = `Ksh ${parseFloat(stats.pendingWithdrawals).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
                 // This requires fetching actual pending requests count, which is not in current stats.
                 // For now, we'll just show the amount.
-                document.getElementById('pending-payouts-sub').textContent = `Pending requests`; 
+                document.getElementById('pending-payouts-sub').textContent = `${stats.pendingCount} Pending requests`; 
 
-                document.getElementById('site-revenue').textContent = `Ksh ${parseFloat(stats.totalPaid).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                document.getElementById('site-revenue').textContent = `Ksh ${parseFloat(stats.totalPaid || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
                 document.getElementById('site-revenue-sub').textContent = `Total Paid`;
+
+                // Handle Spin Stats if available in data
+                if (data.recent_spins) {
+                    const totalWon = data.recent_spins.reduce((sum, s) => sum + parseFloat(s.reward_amount), 0);
+                    document.getElementById('total-spin-wins').textContent = `Ksh ${totalWon.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+                    document.getElementById('total-spin-count').textContent = `${data.recent_spins.length} Spins`;
+                }
+
+                // Handle Recent Payments
+                if (data.recent_payments) {
+                    renderRecentPayments(data.recent_payments);
+                }
 
                 // Fetch active tasks count
                 const videosRes = await fetch(`${API_BASE_URL}/admin/videos`, { headers: { 'Authorization': `Bearer ${token}` } });
@@ -248,6 +392,15 @@
 
             } catch (error) {
                 console.error('Error fetching dashboard stats:', error);
+                // Update UI to show error state instead of 0
+                document.getElementById('total-users').textContent = 'ERR';
+                document.getElementById('total-users-sub').textContent = 'Connection error';
+                document.getElementById('pending-payouts').textContent = 'Ksh ---';
+                document.getElementById('pending-payouts-sub').textContent = 'Offline';
+                document.getElementById('site-revenue').textContent = 'Ksh ---';
+                document.getElementById('site-revenue-sub').textContent = 'Offline';
+                document.getElementById('active-tasks').textContent = '---';
+                document.getElementById('active-tasks-sub').textContent = 'Offline';
             }
         }
 

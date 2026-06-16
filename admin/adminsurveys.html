@@ -58,6 +58,10 @@
                     <i class="fas fa-cogs w-5"></i>
                     <span>System Settings</span>
                 </a>
+                <button onclick="logout()" class="flex w-full items-center space-x-3 hover:bg-red-600/10 text-slate-400 hover:text-red-500 p-3 rounded-xl transition mt-auto">
+                    <i class="fas fa-sign-out-alt w-5"></i>
+                    <span>Sign Out</span>
+                </button>
             </nav>
         </aside>
 
@@ -167,7 +171,11 @@
     </div>
 
     <script>
-        const API_BASE_URL = 'http://localhost:5000';
+        // Robust API URL detection for Local Dev vs Production
+        const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
+        const API_BASE_URL = isDevelopment && (window.location.port !== '5000')
+            ? `${window.location.protocol}//${window.location.hostname}:5000`
+            : window.location.origin;
 
         let allSurveys = []; // Will store fetched surveys
 
@@ -248,6 +256,11 @@
                     </tr>
                 `;
             });
+        }
+
+        function logout() {
+            localStorage.removeItem('adminToken');
+            window.location.href = '/admin/login';
         }
 
         // Modal Control
@@ -355,7 +368,7 @@
         
             const surveyId = surveyIdInput.value;
             const method = surveyId ? 'PUT' : 'POST';
-            const url = surveyId ? `/admin/surveys/${surveyId}` : '/admin/surveys';
+            const url = surveyId ? `${API_BASE_URL}/admin/surveys/${surveyId}` : `${API_BASE_URL}/admin/surveys`;
 
             const questionsData = [];
             questionsContainer.querySelectorAll('.bg-white\\/5').forEach(qDiv => {
@@ -416,7 +429,7 @@
         
             try {
                 const token = localStorage.getItem('adminToken');
-                const response = await fetch(`/admin/surveys/${surveyId}`, {
+                const response = await fetch(`${API_BASE_URL}/admin/surveys/${surveyId}`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}`

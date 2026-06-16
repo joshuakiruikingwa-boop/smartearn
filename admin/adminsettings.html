@@ -3,11 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>System Settings | DURKC QUASH Admin</title>
+    <title>Admin Settings | DURKC QUASH</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="bg-[#020617] font-sans text-slate-300">
+<body class="bg-[#020617] text-slate-300 font-sans">
+    <script>
+        // Client-side authentication check
+        if (!localStorage.getItem('adminToken')) {
+            window.location.href = '/admin/login';
+        }
+    </script>
 
     <!-- Animated Balloon Background -->
     <canvas id="balloon-canvas" class="fixed inset-0 z-[-1] pointer-events-none"></canvas>
@@ -39,6 +45,10 @@
                     <i class="fas fa-hand-holding-dollar w-5"></i>
                     <span>Payout Requests</span>
                 </a>
+                <a href="adminpayments.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-credit-card w-5"></i>
+                    <span>Payment Settings</span>
+                </a>
                 <a href="adminsurveys.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
                     <i class="fas fa-poll-h w-5"></i>
                     <span>Surveys</span>
@@ -52,116 +62,140 @@
                     <span>System Settings</span>
                 </a>
             </nav>
+            <div class="p-4 border-t border-white/10">
+                <div class="flex items-center space-x-3 p-2">
+                    <div class="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold">AD</div>
+                    <div class="text-xs">
+                        <p class="text-white font-bold">System Admin</p>
+                        <p class="text-slate-500 text-[10px] uppercase font-bold tracking-tighter">Superuser</p>
+                    </div>
+                </div>
+            </div>
         </aside>
 
         <!-- Main Content -->
         <main class="flex-1 p-6 md:p-10">
-            <header class="mb-10">
-                <h1 class="text-3xl font-bold text-white">System Settings</h1>
-                <p class="text-slate-500 text-sm">Configure core platform parameters and user reward rules.</p>
-            </header>
+            <div class="max-w-4xl mx-auto">
+                <header class="mb-12">
+            <h1 class="text-3xl font-bold text-white">System Settings</h1>
+            <p class="text-slate-500">Regulate withdrawal limits and other protocol parameters.</p>
+        </header>
 
-            <form id="settings-form" class="space-y-8">
-                <!-- Financial Configuration -->
-                <div class="bg-white/5 backdrop-blur-md p-8 rounded-[2.5rem] border border-white/10">
-                    <h3 class="text-lg font-bold text-white mb-6 flex items-center">
-                        <i class="fas fa-wallet mr-3 text-blue-500"></i> Financial Configuration
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Minimum Withdrawal (Ksh)</label>
-                            <input type="number" step="0.01" value="50.00" class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white">
+        <div class="bg-white/5 border border-white/10 rounded-[2.5rem] p-8 backdrop-blur-xl">
+            <h2 class="text-xl font-bold text-white mb-8 border-b border-white/5 pb-4">Wallet Regulation (Ksh)</h2>
+            
+            <form id="settings-form" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+                    <!-- Total Balance -->
+                    <div class="space-y-4">
+                        <p class="text-blue-500 text-[10px] font-black uppercase tracking-widest">Total Balance Wallet</p>
+                        <div class="grid grid-cols-2 gap-4">
+                            <input type="number" name="min_withdrawal_total" placeholder="Min" class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white">
+                            <input type="number" name="max_withdrawal_total" placeholder="Max" class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white">
                         </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Maximum Daily Withdrawal (Ksh)</label>
-                            <input type="number" step="0.01" value="50000.00" class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white">
+                    </div>
+                    <!-- TikTok -->
+                    <div class="space-y-4">
+                        <p class="text-blue-500 text-[10px] font-black uppercase tracking-widest">TikTok Wallet</p>
+                        <div class="grid grid-cols-2 gap-4">
+                            <input type="number" name="min_withdrawal_tiktok" placeholder="Min" class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white">
+                            <input type="number" name="max_withdrawal_tiktok" placeholder="Max" class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white">
                         </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Withdrawal Fee (%)</label>
-                            <input type="number" step="0.1" value="5.0" class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white">
+                    </div>
+                    <!-- YouTube -->
+                    <div class="space-y-4">
+                        <p class="text-blue-500 text-[10px] font-black uppercase tracking-widest">YouTube Wallet</p>
+                        <div class="grid grid-cols-2 gap-4">
+                            <input type="number" name="min_withdrawal_youtube" placeholder="Min" class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white">
+                            <input type="number" name="max_withdrawal_youtube" placeholder="Max" class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white">
                         </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Currency Symbol</label>
-                            <input type="text" value="Ksh" class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white">
+                    </div>
+                    <!-- Surveys -->
+                    <div class="space-y-4">
+                        <p class="text-blue-500 text-[10px] font-black uppercase tracking-widest">Survey Wallet</p>
+                        <div class="grid grid-cols-2 gap-4">
+                            <input type="number" name="min_withdrawal_surveys" placeholder="Min" class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white">
+                            <input type="number" name="max_withdrawal_surveys" placeholder="Max" class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white">
+                        </div>
+                    </div>
+                    <!-- Spin -->
+                    <div class="space-y-4">
+                        <p class="text-blue-500 text-[10px] font-black uppercase tracking-widest">Spin Wallet</p>
+                        <div class="grid grid-cols-2 gap-4">
+                            <input type="number" name="min_withdrawal_spin" placeholder="Min" class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white">
+                            <input type="number" name="max_withdrawal_spin" placeholder="Max" class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white">
+                        </div>
+                    </div>
+                    <!-- Referrals -->
+                    <div class="space-y-4">
+                        <p class="text-blue-500 text-[10px] font-black uppercase tracking-widest">Referral Wallet</p>
+                        <div class="grid grid-cols-2 gap-4">
+                            <input type="number" name="min_withdrawal_referrals" placeholder="Min" class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white">
+                            <input type="number" name="max_withdrawal_referrals" placeholder="Max" class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white">
                         </div>
                     </div>
                 </div>
 
-                <!-- Reward System -->
-                <div class="bg-white/5 backdrop-blur-md p-8 rounded-[2.5rem] border border-white/10">
-                    <h3 class="text-lg font-bold text-white mb-6 flex items-center">
-                        <i class="fas fa-gift mr-3 text-emerald-500"></i> Reward System
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Referral Bonus (Ksh)</label>
-                            <input type="number" step="0.01" value="10.00" class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Daily Login Bonus (Ksh)</label>
-                            <input type="number" step="0.01" value="1.00" class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Video View Limit (Daily)</label>
-                            <input type="number" value="10" class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Survey Response Limit (Daily)</label>
-                            <input type="number" value="5" class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Platform Controls -->
-                <div class="bg-white/5 backdrop-blur-md p-8 rounded-[2.5rem] border border-white/10">
-                    <h3 class="text-lg font-bold text-white mb-6 flex items-center">
-                        <i class="fas fa-power-off mr-3 text-red-500"></i> Platform Controls
-                    </h3>
-                    <div class="space-y-6">
-                        <div class="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
-                            <div>
-                                <p class="text-white font-bold text-sm">Maintenance Mode</p>
-                                <p class="text-[10px] text-slate-500">When enabled, users will see a maintenance screen and won't be able to access their dashboard.</p>
-                            </div>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" value="" class="sr-only peer">
-                                <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                            </label>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Announcement Banner Text</label>
-                            <input type="text" value="New High-Paying Surveys Added! Earn more today." class="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none transition text-white">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex justify-end">
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-10 py-4 rounded-2xl font-bold transition shadow-lg shadow-blue-900/20 active:scale-95">
-                        Update All Settings
+                <div class="pt-8 border-t border-white/5 flex justify-end">
+                    <button type="submit" class="bg-blue-600 text-white px-10 py-4 rounded-2xl font-bold hover:bg-blue-700 transition shadow-xl shadow-blue-900/20">
+                        Save Configuration
                     </button>
                 </div>
             </form>
+        </div>
+            </div>
         </main>
     </div>
 
     <script>
-        // Client-side authentication check
-        if (!localStorage.getItem('adminToken')) {
-            window.location.href = '/admin/login';
+        const adminToken = localStorage.getItem('adminToken');
+
+        // Robust API URL detection for Local Dev vs Production
+        const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
+        const API_BASE_URL = isDevelopment && (window.location.port !== '5000')
+            ? `${window.location.protocol}//${window.location.hostname}:5000`
+            : window.location.origin;
+
+        document.addEventListener('DOMContentLoaded', fetchSettings);
+
+        async function fetchSettings() {
+            try {
+                const res = await fetch(`${API_BASE_URL}/admin/settings`, {
+                    headers: { 'Authorization': `Bearer ${adminToken}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    const form = document.getElementById('settings-form');
+                    for (const key in data.settings) {
+                        const input = form.querySelector(`[name="${key}"]`);
+                        if (input) input.value = data.settings[key];
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to fetch settings", err);
+            }
         }
 
-        // Form Submission Simulation
-        document.getElementById('settings-form').onsubmit = (e) => {
+        document.getElementById('settings-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            // TODO: Implement actual API call to save settings
-            // Example:
-            // const token = localStorage.getItem('adminToken');
-            // fetch('/admin/settings', {
-            //     method: 'PUT',
-            //     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            //     body: JSON.stringify({ /* form data */ })
-            // }).then(response => response.json()).then(data => alert('Settings updated successfully!')).catch(error => console.error('Error saving settings:', error));
-        };
+            const formData = new FormData(e.target);
+            const settings = {};
+            formData.forEach((value, key) => { settings[key] = value; });
+
+            try {
+                const res = await fetch(`${API_BASE_URL}/admin/settings`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${adminToken}`
+                    },
+                    body: JSON.stringify({ settings })
+                });
+                const data = await res.json();
+                if (data.success) { alert('Settings updated successfully!'); }
+                else { alert(data.message || 'Update failed'); }
+            } catch (err) { alert('Connection error'); }
+        });
 
         // Mobile Sidebar Functionality
         const sidebar = document.getElementById('sidebar');
@@ -172,10 +206,11 @@
             sidebar.classList.toggle('-translate-x-full');
             overlay.classList.toggle('hidden');
         }
+
         mobileToggle.onclick = toggleSidebar;
         overlay.onclick = toggleSidebar;
 
-        // Balloon Background Logic
+        // Shared Balloon Background Logic
         const canvas = document.getElementById('balloon-canvas');
         const ctx = canvas.getContext('2d');
         let balloons = [];
@@ -205,13 +240,6 @@
                 ctx.arc(this.x - 8, this.y - 8, 6, 0, Math.PI * 2);
                 ctx.fillStyle = 'rgba(255,255,255,0.05)';
                 ctx.fill();
-
-                // Draw string
-                ctx.beginPath();
-                ctx.moveTo(this.x, this.y + this.radius);
-                ctx.lineTo(this.x, this.y + this.radius + 15);
-                ctx.strokeStyle = this.color;
-                ctx.stroke();
             }
             update(others) {
                 if (this.x + this.radius > canvas.width || this.x - this.radius < 0) this.dx *= -1;

@@ -46,6 +46,10 @@
                     <i class="fas fa-hand-holding-dollar w-5"></i>
                     <span>Payout Requests</span>
                 </a>
+                <a href="adminpayments.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-credit-card w-5"></i>
+                    <span>Payment Settings</span>
+                </a>
                 <a href="adminsurveys.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
                     <i class="fas fa-poll-h w-5"></i>
                     <span>Surveys</span>
@@ -53,6 +57,10 @@
                 <a href="adminvideotasks.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
                     <i class="fab fa-youtube w-5"></i>
                     <span>Video Tasks</span>
+                </a>
+                <a href="adminspin.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-dharmachakra w-5"></i>
+                    <span>Spin Logs</span>
                 </a>
                 <a href="adminsettings.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
                     <i class="fas fa-cogs w-5"></i>
@@ -111,11 +119,13 @@
                     <table class="w-full text-left">
                         <thead class="bg-white/5 text-[10px] uppercase font-bold text-slate-500 tracking-widest">
                             <tr>
-                                <th class="px-8 py-5">User Details</th>
+                                <th class="px-8 py-5">User & Contact</th>
                                 <th class="px-8 py-5">Membership</th>
+                                <th class="px-8 py-5">Referrals & Rewards</th>
                                 <th class="px-8 py-5">Verification</th>
-                                <th class="px-8 py-5">Balance</th>
+                                <th class="px-8 py-5">Wallet Balance</th>
                                 <th class="px-8 py-5">Status</th>
+                                <th class="px-8 py-5">Joined</th>
                                 <th class="px-8 py-5 text-right">Actions</th>
                             </tr>
                         </thead>
@@ -163,12 +173,18 @@
         mobileToggle.onclick = toggleSidebar;
         overlay.onclick = toggleSidebar;
 
+        // Robust API URL detection for Local Dev vs Production
+        const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
+        const API_BASE_URL = isDevelopment && (window.location.port !== '5000')
+            ? `${window.location.protocol}//${window.location.hostname}:5000`
+            : window.location.origin;
+
         let allUsers = [];
 
         // Fetch Users from API
         async function fetchUsers() {
             try {
-                const response = await fetch('/admin/users', {
+                const response = await fetch(`${API_BASE_URL}/admin/users`, {
                     headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
                 });
                 const data = await response.json();
@@ -219,7 +235,7 @@
             };
 
             try {
-                const response = await fetch(`/admin/users/${id}`, {
+                const response = await fetch(`${API_BASE_URL}/admin/users/${id}`, {
                     method: 'PUT',
                     headers: { 
                         'Content-Type': 'application/json',
@@ -242,7 +258,7 @@
             if(!confirm('Are you sure you want to change this user\'s status?')) return;
             
             try {
-                const response = await fetch(`/admin/users/${userId}/status`, {
+                const response = await fetch(`${API_BASE_URL}/admin/users/${userId}/status`, {
                     method: 'PATCH',
                     headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
                 });
@@ -279,6 +295,11 @@
             }, 4000);
         }
 
+        function logout() {
+            localStorage.removeItem('adminToken');
+            window.location.href = '/admin/login';
+        }
+
         function renderUsers() {
             const filterText = document.getElementById('user-search').value.toLowerCase();
             const filterStatus = document.getElementById('status-filter').value;
@@ -299,7 +320,8 @@
             });
 
             filtered.forEach(u => {
-                const initials = u.full_name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                const name = u.full_name || u.username || 'User';
+                const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
                 const isSuspended = u.status === 'suspended';
                 const statusColor = !isSuspended ? 'text-green-500 bg-green-500/10' : 'text-red-500 bg-red-500/10';
                 
@@ -316,12 +338,14 @@
                 
                 tbody.innerHTML += `
                     <tr class="hover:bg-white/5 transition">
-                        <td class="px-8 py-4">
+                        <td class="px-8 py-4 min-w-[200px]">
                             <div class="flex items-center space-x-3">
                                 <div class="w-10 h-10 rounded-full bg-blue-600/20 flex items-center justify-center text-blue-500 font-extrabold text-xs">${initials}</div>
                                 <div>
+                                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">ID: ${u.id}</p>
                                     <p class="text-white font-bold text-sm">${u.full_name}</p>
                                     <p class="text-[10px] text-slate-500">${u.email}</p>
+                                    <p class="text-[10px] text-slate-500">${u.phone_number}</p>
                                 </div>
                             </div>
                         </td>
@@ -329,11 +353,23 @@
                             <span class="${membershipColor} px-3 py-1 rounded-lg text-[10px] font-bold uppercase">${u.membership} Member</span>
                         </td> 
                         <td class="px-8 py-4">
+                            <div class="space-y-1">
+                                <p class="text-white font-mono text-[10px] font-bold uppercase tracking-tighter">Code: ${u.referral_code || 'N/A'}</p>
+                                <p class="text-emerald-400 font-bold text-xs">+ Ksh ${(parseFloat(u.referrals_balance) || 0).toLocaleString()}</p>
+                            </div>
+                        </td>
+                        <td class="px-8 py-4">
                             <span class="${verifyColor} px-3 py-1 rounded-lg text-[10px] font-bold uppercase">${verifyText}</span>
                         </td>
-                        <td class="px-8 py-4 text-white font-mono text-sm">Ksh ${u.balance.toLocaleString()}</td>
+                        <td class="px-8 py-4 min-w-[150px]">
+                            <p class="text-white font-mono text-sm">Ksh ${parseFloat(u.balance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                            <p class="text-[10px] text-slate-500">Withdrawn: Ksh ${parseFloat(u.total_withdrawals || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                        </td>
                         <td class="px-8 py-4">
                             <span class="${statusColor} px-3 py-1 rounded-full text-[10px] font-bold uppercase">${u.status}</span>
+                        </td>
+                        <td class="px-8 py-4 text-slate-500 text-xs min-w-[120px]">
+                            ${new Date(u.created_at).toLocaleDateString()}
                         </td>
                         <td class="px-8 py-4 text-right">
                             <div class="flex justify-end space-x-2">

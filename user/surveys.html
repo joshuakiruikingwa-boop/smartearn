@@ -93,20 +93,7 @@
 
             <!-- Survey Grid -->
             <div id="survey-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Survey Card 1 -->
-                <div class="bg-white/5 border border-white/10 rounded-[2rem] p-6 flex flex-col space-y-4 hover:border-blue-500/30 transition">
-                    <div class="flex justify-between items-start">
-                        <div class="bg-blue-600/20 text-blue-400 p-3 rounded-2xl">
-                            <i class="fas fa-bolt text-xl"></i>
-                        </div>
-                        <span class="text-green-400 font-bold text-lg">Ksh 5.00</span>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-white">Tech Trends 2026</h3>
-                        <p class="text-xs text-slate-500 mt-1">3 Questions • 1 Minute</p>
-                    </div>
-                    <button onclick="startSurvey()" class="w-full bg-blue-600 text-white py-3 rounded-2xl font-bold hover:bg-blue-700 transition">Start Survey</button>
-                </div>
+                <p class="col-span-full text-center text-slate-500 py-10 italic">Loading available surveys...</p>
             </div>
 
             <!-- Active Survey Container (Hidden by default) -->
@@ -139,7 +126,7 @@
                     <p class="text-slate-500 mb-8">You've answered all questions correctly.</p>
                     <div class="bg-white/5 border border-white/10 p-6 rounded-3xl mb-8">
                         <p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Reward Earned</p>
-                        <p class="text-3xl font-bold text-white">Ksh 5.00</p>
+                        <p id="success-reward" class="text-3xl font-bold text-white">Ksh 0.00</p>
                     </div>
                     <button onclick="location.reload()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold hover:bg-blue-700 transition">Claim & Close</button>
                 </div>
@@ -191,54 +178,79 @@
         overlay.addEventListener('click', toggleSidebar);
 
         const token = localStorage.getItem('token');
-
-        // Redirect if not logged in
         if (!token) {
             window.location.href = 'login.html';
         }
 
+        let allSurveys = [];
+        let currentSurvey = null;
+        let currentIndex = 0;
+        let selectedOption = null;
+
         // Fetch user data on load to update available earnings
         document.addEventListener('DOMContentLoaded', async () => {
+            fetchProfile();
+            fetchSurveys();
+        });
+
+        async function fetchProfile() {
             try {
-                const response = await fetch('/api/users/profile', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (!response.ok) throw new Error('Failed to fetch profile');
-
-                const user = await response.json();
+                const res = await fetch('/api/users/profile', { headers: { 'Authorization': `Bearer ${token}` } });
+                const user = await res.json();
                 const balance = parseFloat(user.balance || 0).toLocaleString('en-KE', {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2
                 });
                 document.getElementById('available-earnings-amount').innerText = `Ksh ${balance}`;
-            } catch (error) {
-                console.error('Error fetching user balance:', error);
+            } catch (err) { console.error(err); }
+        }
+
+        async function fetchSurveys() {
+            try {
+                const res = await fetch('/api/tasks/surveys', { headers: { 'Authorization': `Bearer ${token}` } });
+                allSurveys = await res.json();
+                renderSurveyList();
+            } catch (err) { console.error(err); }
+        }
+
+        function renderSurveyList() {
+            const container = document.getElementById('survey-list');
+            const active = allSurveys.filter(s => s.status === 'active');
+
+            if (active.length === 0) {
+                container.innerHTML = `<p class="col-span-full text-center text-slate-500 py-10 italic">No surveys available right now.</p>`;
+                return;
             }
-        });
 
-        const questions = [
-            { q: "What is the primary benefit of blockchain technology?", options: ["Centralization", "Transparency", "High Costs", "Slow Speed"], correct: 1 },
-            { q: "Which of these is a popular cryptocurrency?", options: ["US Dollar", "Euro", "Bitcoin", "Gold"], correct: 2 },
-            { q: "What does ROI stand for?", options: ["Rate Of Interest", "Return On Investment", "Risk Of Inflation", "Return On Income"], correct: 1 }
-        ];
+            container.innerHTML = active.map(s => `
+                <div class="bg-white/5 border border-white/10 rounded-[2rem] p-6 flex flex-col space-y-4 hover:border-blue-500/30 transition">
+                    <div class="flex justify-between items-start">
+                        <div class="bg-blue-600/20 text-blue-400 p-3 rounded-2xl"><i class="fas fa-poll-h text-xl"></i></div>
+                        <span class="text-green-400 font-bold text-lg">Ksh ${parseFloat(s.reward).toFixed(2)}</span>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-white">${s.title}</h3>
+                        <p class="text-xs text-slate-500 mt-1">${s.questions.length} Questions • ${s.duration_minutes} Mins</p>
+                    </div>
+                    <button onclick="startSurvey(${s.id})" class="w-full bg-blue-600 text-white py-3 rounded-2xl font-bold hover:bg-blue-700 transition">Start Survey</button>
+                </div>
+            `).join('');
+        }
 
-        let currentIndex = 0;
-        let selectedOption = null;
-
-        function startSurvey() {
+        function startSurvey(id) {
+            currentSurvey = allSurveys.find(s => s.id === id);
+            currentIndex = 0;
             document.getElementById('survey-list').classList.add('hidden');
             document.getElementById('active-survey').classList.remove('hidden');
+            document.getElementById('total-qs').innerText = currentSurvey.questions.length;
             renderQuestion();
         }
 
         function renderQuestion() {
-            const q = questions[currentIndex];
+            const q = currentSurvey.questions[currentIndex];
             document.getElementById('current-idx').innerText = currentIndex + 1;
-            document.getElementById('question-text').innerText = q.q;
-            document.getElementById('progress-bar').style.width = ((currentIndex + 1) / questions.length) * 100 + '%';
+            document.getElementById('question-text').innerText = q.questionText;
+            document.getElementById('progress-bar').style.width = ((currentIndex + 1) / currentSurvey.questions.length) * 100 + '%';
             
             const container = document.getElementById('options-container');
             container.innerHTML = '';
@@ -263,14 +275,43 @@
             document.getElementById('next-btn').className = "mt-10 w-full bg-blue-600 text-white py-4 rounded-2xl font-bold transition hover:bg-blue-700";
         }
 
-        function handleNext() {
-            if (selectedOption === questions[currentIndex].correct) {
+        async function handleNext() {
+            if (selectedOption === currentSurvey.questions[currentIndex].correctOptionIndex) {
                 currentIndex++;
-                if (currentIndex < questions.length) {
+                if (currentIndex < currentSurvey.questions.length) {
                     renderQuestion();
                 } else {
-                    document.getElementById('question-box').classList.add('hidden');
-                    document.getElementById('success-screen').classList.remove('hidden');
+                    try {
+                        const res = await fetch('/api/tasks/complete', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            },
+                            body: JSON.stringify({
+                                taskType: 'surveys',
+                                taskId: currentSurvey.id,
+                                rewardAmount: currentSurvey.reward
+                            })
+                        });
+                        
+                        if (res.ok) {
+                            document.getElementById('question-box').classList.add('hidden');
+                            document.getElementById('success-screen').classList.remove('hidden');
+                            document.getElementById('success-reward').innerText = `Ksh ${parseFloat(currentSurvey.reward).toFixed(2)}`;
+                            
+                            // Update balance display immediately
+                            const balanceEl = document.getElementById('available-earnings-amount');
+                            const currentBal = parseFloat(balanceEl.innerText.replace(/[^\d.]/g, ''));
+                            balanceEl.innerText = `Ksh ${(currentBal + parseFloat(currentSurvey.reward)).toFixed(2)}`;
+                        } else {
+                            const data = await res.json();
+                            alert(data.message || 'Failed to claim survey reward');
+                        }
+                    } catch (err) {
+                        console.error("Error completing survey:", err);
+                        alert("Connection error. Please try again.");
+                    }
                 }
             } else {
                 alert("Incorrect answer. Please try again!");

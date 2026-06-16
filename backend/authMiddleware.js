@@ -9,7 +9,7 @@ module.exports = (req, res, next) => {
     try {
         const verified = jwt.verify(token, process.env.JWT_SECRET);
         req.user = verified;
-        req.user.id = verified.userId; // Ensure .id is available for all controllers
+        req.user.id = verified.id; // Fixed: Matches the 'id' key used in authController
         next();
     } catch (err) {
         res.status(403).json({ message: 'Invalid Token' });

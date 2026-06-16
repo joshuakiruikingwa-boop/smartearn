@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { protect } = require('../middlewares/authMiddleware');
+const auth = require('../authMiddleware');
 const { getEarningsSummary } = require('../controllers/earningController');
 
 // All earning routes are protected
-router.use(protect);
+router.use(auth);
 
 router.get('/summary', getEarningsSummary);
 

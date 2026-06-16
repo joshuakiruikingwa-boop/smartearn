@@ -1,12 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../db');
+const { pool } = require('../config/db'); // Use pool directly
 const auth = require('../authMiddleware');
 
 router.get('/profile', auth, async (req, res) => {
     try {
-        const result = await db.query(
-            'SELECT u.full_name, u.username, u.email, u.phone_number, u.balance, u.profile_photo, m.name as membership_name FROM users u JOIN memberships m ON u.membership_id = m.id WHERE u.id = $1',
+        const result = await pool.query(
+            `SELECT 
+                full_name, username, email, phone_number, 
+                balance, profile_photo, is_active, status
+             FROM users 
+             WHERE id = $1`,
             [req.user.id]
         );
         if (result.rows.length === 0) return res.status(404).json({ message: 'User not found' });
@@ -20,7 +24,7 @@ router.get('/profile', auth, async (req, res) => {
 router.post('/update-photo', auth, async (req, res) => {
     const { profilePhoto } = req.body;
     try {
-        await db.query('UPDATE users SET profile_photo = $1 WHERE id = $2', [profilePhoto, req.user.id]);
+        await pool.query('UPDATE users SET profile_photo = $1 WHERE id = $2', [profilePhoto, req.user.id]);
         res.json({ message: 'Profile photo updated successfully' });
     } catch (err) {
         console.error(err);
@@ -31,7 +35,7 @@ router.post('/update-photo', auth, async (req, res) => {
 router.get('/stats', auth, async (req, res) => {
     const userId = req.user.id;
     try {
-        const result = await db.query(`
+        const result = await pool.query(`
             SELECT 
                 TO_CHAR(days.day, 'Dy') as label,
                 COALESCE(SUM(al.reward_amount), 0) as total,

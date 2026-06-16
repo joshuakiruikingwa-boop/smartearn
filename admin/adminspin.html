@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spin Management | DURKC QUASH ADMIN</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-[#020617] font-sans text-slate-300">
+    <script>if (!localStorage.getItem('adminToken')) window.location.href = '/admin/login';</script>
+
+    <!-- Animated Balloon Background -->
+    <canvas id="balloon-canvas" class="fixed inset-0 z-[-1] pointer-events-none"></canvas>
+
+    <!-- Mobile Sidebar Toggle -->
+    <button id="mobile-toggle" class="md:hidden fixed top-6 left-6 z-[60] w-12 h-12 flex items-center justify-center bg-slate-900/90 border border-white/10 rounded-2xl text-blue-500 shadow-2xl active:scale-90 transition-all backdrop-blur-md">
+        <i class="fas fa-bars text-xl"></i>
+    </button>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden md:hidden transition-opacity duration-300"></div>
+
+    <div class="flex min-h-screen relative">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="w-64 bg-slate-950/50 backdrop-blur-xl border-r border-white/10 text-slate-400 fixed md:sticky inset-y-0 left-0 z-50 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col flex-shrink-0">
+            <div class="p-6">
+                <span class="text-2xl font-bold text-white">DURKC <span class="text-blue-500">QUASH</span> Admin</span>
+            </div>
+            <nav class="flex-1 px-4 space-y-1 mt-4">
+                <a href="admindashboard.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-chart-line w-5"></i>
+                    <span>Overview</span>
+                </a>
+                <a href="adminusermanagement.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-users-cog w-5"></i>
+                    <span>User Management</span>
+                </a>
+                <a href="adminpayouts.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-hand-holding-dollar w-5"></i>
+                    <span>Payout Requests</span>
+                </a>
+                <a href="adminpayments.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-credit-card w-5"></i>
+                    <span>Payment Settings</span>
+                </a>
+                <a href="adminsurveys.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-poll-h w-5"></i>
+                    <span>Surveys</span>
+                </a>
+                <a href="adminvideotasks.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fab fa-youtube w-5"></i>
+                    <span>Video Tasks</span>
+                </a>
+                <a href="adminspin.html" class="flex items-center space-x-3 bg-blue-600 text-white p-3 rounded-xl transition">
+                    <i class="fas fa-dharmachakra w-5"></i>
+                    <span>Spin Logs</span>
+                </a>
+                <a href="adminsettings.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                    <i class="fas fa-cogs w-5"></i>
+                    <span>System Settings</span>
+                </a>
+            </nav>
+            <div class="p-4 border-t border-white/10">
+                <div class="flex items-center space-x-3 p-2">
+                    <div class="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center text-white text-xs font-bold">AD</div>
+                    <div class="text-xs">
+                        <p class="text-white font-bold">System Admin</p>
+                        <p class="text-slate-500 text-[10px] uppercase font-bold tracking-tighter">Superuser</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6 md:p-10">
+            <header class="mb-10 flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-white">Spin Management</h1>
+                    <p class="text-slate-500 text-sm">Monitor user spin activity and total prize distributions.</p>
+                </div>
+                <div class="flex gap-4">
+                    <button onclick="fetchSpinLogs()" class="bg-white/5 border border-white/10 p-3 rounded-xl hover:bg-white/10 transition text-blue-500">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Prize Configuration -->
+            <div class="bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-md mb-10">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-white">Wheel Prize Configuration</h3>
+                    <span class="text-[10px] text-blue-500 font-bold uppercase tracking-widest bg-blue-500/10 px-3 py-1 rounded-full">Daily Prizes</span>
+                </div>
+                <form id="spin-config-form" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest px-4">
+                        <span>Display Label (e.g. Ksh 50.00)</span>
+                        <span>Numerical Value (Amount)</span>
+                    </div>
+                    <div id="prize-inputs-container" class="space-y-3">
+                        <!-- Rows Injected by JS -->
+                    </div>
+                    <div class="pt-6 flex justify-end">
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-10 py-3 rounded-2xl font-bold transition shadow-xl shadow-blue-900/20 active:scale-95">
+                            Save Wheel Configuration
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Stats Overview -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                <div class="bg-white/5 border border-white/10 p-6 rounded-3xl backdrop-blur-md">
+                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Active Users</p>
+                    <h2 id="active-users" class="text-2xl font-bold text-purple-400">0</h2>
+                </div>
+                <div class="bg-white/5 border border-white/10 p-6 rounded-3xl backdrop-blur-md">
+                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Spins Executed</p>
+                    <h2 id="total-spins" class="text-2xl font-bold text-white">0</h2>
+                </div>
+                <div class="bg-white/5 border border-white/10 p-6 rounded-3xl backdrop-blur-md">
+                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Total Prize Value</p>
+                    <h2 id="total-won" class="text-2xl font-bold text-emerald-400">Ksh 0.00</h2>
+                </div>
+                <div class="bg-white/5 border border-white/10 p-6 rounded-3xl backdrop-blur-md">
+                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Highest Win Today</p>
+                    <h2 id="max-win" class="text-2xl font-bold text-blue-400">Ksh 0.00</h2>
+                </div>
+            </div>
+
+            <!-- Spin Logs Table -->
+            <div class="bg-white/5 border border-white/10 rounded-3xl overflow-hidden backdrop-blur-md">
+                <div class="p-6 border-b border-white/10 flex justify-between items-center">
+                    <h3 class="font-bold text-white">Live Spin Activity</h3>
+                    <input type="text" id="log-search" placeholder="Search user..." class="bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-xs outline-none focus:ring-2 focus:ring-blue-500 text-white transition-all w-48 focus:w-64">
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-white/5 text-slate-400 text-[10px] uppercase font-bold tracking-widest">
+                            <tr>
+                                <th class="px-6 py-4">User</th>
+                                <th class="px-6 py-4">Prize Amount</th>
+                                <th class="px-6 py-4">Completion Time</th>
+                                <th class="px-6 py-4">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="spin-table-body" class="divide-y divide-white/5">
+                            <tr>
+                                <td colspan="4" class="px-6 py-10 text-center text-slate-500 italic">Connecting to database...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Mobile Sidebar Functionality
+        const sidebar = document.getElementById('sidebar'), 
+              mobileToggle = document.getElementById('mobile-toggle'),
+              overlay = document.getElementById('sidebar-overlay');
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+        mobileToggle.onclick = toggleSidebar;
+        overlay.onclick = toggleSidebar;
+
+        // Robust API URL detection for Local Dev vs Production
+        const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
+        const API_BASE_URL = isDevelopment && (window.location.port !== '5000')
+            ? `${window.location.protocol}//${window.location.hostname}:5000`
+            : window.location.origin;
+        const token = localStorage.getItem('adminToken');
+
+        const DEFAULT_LABELS = ["Ksh 50.00", "Ksh 5.00", "Ksh 25.00", "Ksh 8.00", "Ksh 40.00", "Try Again", "Ksh 15.00", "Ksh 10.00"];
+        const DEFAULT_VALUES = [50, 5, 25, 8, 40, 0, 15, 10];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderPrizeInputs(DEFAULT_LABELS, DEFAULT_VALUES);
+            fetchSpinLogs();
+            fetchSpinConfig();
+        });
+
+        function renderPrizeInputs(currentLabels = [], currentValues = []) {
+            const container = document.getElementById('prize-inputs-container');
+            container.innerHTML = '';
+            for (let i = 0; i < 8; i++) {
+                container.innerHTML += `
+                    <div class="grid grid-cols-2 gap-4">
+                        <input type="text" name="label-${i}" value="${currentLabels[i] || ''}" placeholder="Segment ${i+1} Label" required class="bg-white/5 border border-white/10 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none text-white text-sm">
+                        <input type="number" step="0.01" name="value-${i}" value="${currentValues[i] || 0}" placeholder="Amount" required class="bg-white/5 border border-white/10 rounded-xl py-3 px-4 focus:ring-2 focus:ring-blue-600 outline-none text-white text-sm font-mono">
+                    </div>`;
+            }
+        }
+
+        async function fetchSpinConfig() {
+            try {
+                const res = await fetch(`${API_BASE_URL}/admin/spin-config`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const data = await res.json();
+                if (data.success && data.config) renderPrizeInputs(data.config.labels, data.config.values);
+            } catch (err) { console.error(err); }
+        }
+
+        document.getElementById('spin-config-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target), labels = [], values = [];
+            for (let i = 0; i < 8; i++) {
+                labels.push(formData.get(`label-${i}`));
+                values.push(parseFloat(formData.get(`value-${i}`)));
+            }
+            try {
+                const res = await fetch(`${API_BASE_URL}/admin/spin-config`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ labels, values })
+                });
+                const data = await res.json();
+                alert(data.success ? 'Spin rewards updated successfully!' : 'Error: ' + data.message);
+            } catch (err) { alert('Connection error'); }
+        };
+
+        let allSpinLogs = [];
+        async function fetchSpinLogs() {
+            try {
+                const res = await fetch(`${API_BASE_URL}/admin/stats`, { // Redirects to relevant dashboard stats
+                     headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                
+                // Assuming the backend stats includes recent tasks where task_type = 'spin'
+                if (data.recent_spins) {
+                    // Update general dashboard stats if available
+                    if (data.stats && data.stats.activeUsers !== undefined) {
+                        document.getElementById('active-users').innerText = data.stats.activeUsers;
+                    }
+                    allSpinLogs = data.recent_spins;
+                    renderLogs(allSpinLogs);
+                } else {
+                    // Mock or placeholder logic if endpoint doesn't return list
+                    document.getElementById('spin-table-body').innerHTML = `<tr><td colspan="4" class="px-6 py-10 text-center text-slate-500 italic">No spin records found.</td></tr>`;
+                }
+            } catch (err) {
+                console.error("Fetch Error:", err);
+            }
+        }
+
+        function renderLogs(logs, updateStats = true) {
+            const tbody = document.getElementById('spin-table-body');
+            let total = 0;
+            let max = 0;
+
+            tbody.innerHTML = logs.length === 0 ? `<tr><td colspan="4" class="px-6 py-10 text-center text-slate-500 italic">No results match your search.</td></tr>` : logs.map(log => {
+                const val = parseFloat(log.reward_amount);
+                total += val;
+                if (val > max) max = val;
+
+                return `
+                    <tr class="hover:bg-white/5 transition text-sm">
+                        <td class="px-6 py-4 text-white font-medium">${log.username || 'User ID: ' + log.user_id}</td>
+                        <td class="px-6 py-4 font-bold ${val > 0 ? 'text-green-400' : 'text-slate-500'}">Ksh ${val.toFixed(2)}</td>
+                        <td class="px-6 py-4 text-slate-500">${new Date(log.created_at).toLocaleString()}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${val > 0 ? 'bg-green-500/10 text-green-500' : 'bg-white/5 text-slate-400'}">
+                                ${val > 0 ? 'Win' : 'No Win'}
+                            </span>
+                        </td>
+                    </tr>`;
+            }).join('');
+
+            if (updateStats) {
+                document.getElementById('total-spins').innerText = logs.length;
+                document.getElementById('total-won').innerText = `Ksh ${total.toFixed(2)}`;
+                document.getElementById('max-win').innerText = `Ksh ${max.toFixed(2)}`;
+            }
+        }
+
+        document.getElementById('log-search').addEventListener('input', (e) => {
+            const filter = e.target.value.toLowerCase();
+            const filtered = allSpinLogs.filter(log => (log.username || '').toLowerCase().includes(filter));
+            renderLogs(filtered, false);
+        });
+
+        // Shared Balloon Background Logic
+        const canvas = document.getElementById('balloon-canvas');
+        const ctx = canvas.getContext('2d');
+        let balloons = [];
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+        class Balloon {
+            constructor() {
+                this.radius = 25;
+                this.x = Math.random() * (canvas.width - 50) + 25;
+                this.y = Math.random() * (canvas.height - 50) + 25;
+                this.dx = (Math.random() - 0.5) * 1.5;
+                this.dy = (Math.random() - 0.5) * 1.5;
+                this.color = `hsla(${Math.random() * 360}, 60%, 50%, 0.2)`;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(this.x - 8, this.y - 8, 6, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255,255,255,0.05)';
+                ctx.fill();
+            }
+            update(others) {
+                if (this.x + this.radius > canvas.width || this.x - this.radius < 0) this.dx *= -1;
+                if (this.y + this.radius > canvas.height || this.y - this.radius < 0) this.dy *= -1;
+                this.x += this.dx;
+                this.y += this.dy;
+                this.draw();
+            }
+        }
+        for (let i = 0; i < 40; i++) balloons.push(new Balloon());
+        function animate() { ctx.clearRect(0, 0, canvas.width, canvas.height); balloons.forEach(b => b.update(balloons)); requestAnimationFrame(animate); }
+        animate();
+    </script>
+</body>
+</html>

@@ -23,6 +23,11 @@ const userRoutes = require('./routes/users');
 const taskRoutes = require('./routes/taskRoutes');
 const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const statsRoutes = require('./routes/statsRoutes');
+const walletRoutes = require('./routes/walletRoutes');
+const earningRoutes = require('./routes/earningRoutes');
+const membershipRoutes = require('./routes/membershipRoutes');
+const referralRoutes = require('./routes/referralRoutes');
 const pesapal = require('./pesapal');
 const authMiddleware = require('./authMiddleware');
 
@@ -38,6 +43,11 @@ app.get('/', (req, res) => {
 app.use('/api/users', userRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/stats', statsRoutes);
+app.use('/api/wallet', walletRoutes);
+app.use('/api/earnings', earningRoutes);
+app.use('/api/membership', membershipRoutes);
+app.use('/api/referrals', referralRoutes);
 app.use('/admin', adminRoutes);
 
 // PesaPal Payment Routes

@@ -1,8 +1,17 @@
 const { pool } = require('../config/db');
 
 class Survey {
-    static async findAll() {
-        const result = await pool.query('SELECT * FROM surveys ORDER BY created_at DESC');
+    static async findAll(onlyActive = true) {
+        let query = 'SELECT * FROM surveys';
+        const conditions = [];
+        if (onlyActive) {
+            conditions.push("status = 'active'");
+        }
+        if (conditions.length > 0) {
+            query += ' WHERE ' + conditions.join(' AND ');
+        }
+        query += ' ORDER BY created_at DESC';
+        const result = await pool.query(query);
         return result.rows;
     }
 
